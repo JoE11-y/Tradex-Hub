@@ -1,0 +1,4 @@
+[package]
+name = "badge_proof"
+type = "bin"
+compiler_version = ">=1.0.0"

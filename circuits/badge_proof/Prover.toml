@@ -1,0 +1,24 @@
+# Test witness: level_2 badge (badge_type=1, threshold=100)
+# Player has 150 XP, 8 trades, 3 win streak
+
+# Public inputs
+player_id = "42"
+badge_type = "1"
+badge_threshold = "100"
+# attestation_hash computed: polynomial accumulator of stats below
+# running = 0*997+150 = 150
+# running = 150*997+8 = 149558
+# running = 149558*997+3 = 149112629
+# running = 149112629*997+120000 = 148665339313 + 120000 = 148665459313 (approx)
+# ... (exact value computed at proof time by nargo execute)
+attestation_hash = "146886187271912257414041"
+
+# Private inputs (server-attested stats)
+total_xp = "150"
+total_trades = "8"
+win_streak = "3"
+longest_hold_ms = "120000"
+near_liq_closes = "1"
+total_sessions = "2"
+profitable_sessions = "1"
+verified_sessions = "0"

@@ -40,14 +40,19 @@ export function WalletSwitcher() {
     return (
       <div className="wallet-switcher">
         {error ? (
-          <div className="wallet-error">
-            <div className="error-title">Connection Failed</div>
-            <div className="error-message">{error}</div>
+          <div className="wallet-status connecting">
+            <span className="status-indicator"></span>
+            <span className="status-text" title={error}>Dev Wallet</span>
+          </div>
+        ) : isConnecting ? (
+          <div className="wallet-status connecting">
+            <span className="status-indicator"></span>
+            <span className="status-text">Connecting...</span>
           </div>
         ) : (
           <div className="wallet-status connecting">
             <span className="status-indicator"></span>
-            <span className="status-text">Connecting...</span>
+            <span className="status-text">Not Connected</span>
           </div>
         )}
       </div>

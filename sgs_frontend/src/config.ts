@@ -16,6 +16,9 @@ export const config = {
   numberGuessId: getContractId('number-guess'),
   diceDuelId: getContractId('dice-duel'),
 
+  // Tradex hub contract
+  tradexHubId: getContractId('tradex-hub'),
+
   devPlayer1Address: import.meta.env.VITE_DEV_PLAYER1_ADDRESS || '',
   devPlayer2Address: import.meta.env.VITE_DEV_PLAYER2_ADDRESS || '',
 };

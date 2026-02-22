@@ -1,0 +1,21 @@
+{
+  "name": "tradex-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@aztec/bb.js": "0.87.0",
+    "@noir-lang/noir_js": "1.0.0-beta.9",
+    "@stellar/stellar-sdk": "^14.5.0",
+    "hono": "^4.7.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.9.0"
+  }
+}

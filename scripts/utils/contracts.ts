@@ -9,6 +9,8 @@ export type ContractInfo = {
   envKey: string;
   bindingsOutDir: string;
   isMockHub: boolean;
+  /** Standalone contracts are excluded from the workspace (different soroban-sdk rev, etc.) */
+  isStandalone: boolean;
 };
 
 export type ContractSelection = {
