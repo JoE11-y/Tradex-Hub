@@ -36,7 +36,7 @@ export function PortfolioWidget() {
         </div>
         <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+            className="h-full transition-all duration-500 bg-indigo-500 rounded-full"
             style={{ width: `${Math.min(100, xpProgress)}%` }}
           />
         </div>
@@ -48,7 +48,7 @@ export function PortfolioWidget() {
       </div>
 
       {/* Equity */}
-      <div className="bg-slate-800/50 rounded-lg p-3">
+      <div className="p-3 mt-1 mb-1 rounded-lg bg-slate-800/50">
         <div className="text-xs text-slate-200 mb-0.5">Total Equity</div>
         <div className="text-xl font-bold text-white">
           ${equity.toFixed(2)}
@@ -63,7 +63,7 @@ export function PortfolioWidget() {
 
       {/* Drawdown lockout warning */}
       {isLocked && drawdownPct !== null && (
-        <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-2 text-center">
+        <div className="p-2 text-center border rounded-lg bg-red-900/30 border-red-500/30">
           <div className="text-[10px] text-red-400 font-semibold uppercase tracking-wider">Drawdown Lockout</div>
           <div className="text-xs text-red-300 mt-0.5">{drawdownPct.toFixed(1)}% drawdown — new positions locked</div>
         </div>
@@ -71,19 +71,19 @@ export function PortfolioWidget() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="bg-slate-800/30 rounded p-2">
+        <div className="p-2 rounded bg-slate-800/30">
           <div className="text-[10px] ">Available</div>
           <div className="text-sm font-medium text-white">
             ${portfolio.balance.toFixed(2)}
           </div>
         </div>
-        <div className="bg-slate-800/30 rounded p-2">
+        <div className="p-2 rounded bg-slate-800/30">
           <div className="text-[10px] ">In Positions</div>
           <div className="text-sm font-medium text-white">
             ${portfolio.lockedMargin.toFixed(2)}
           </div>
         </div>
-        <div className="bg-slate-800/30 rounded p-2">
+        <div className="p-2 rounded bg-slate-800/30">
           <div className="text-[10px] ">Unrealized PnL</div>
           <div
             className={`text-sm font-medium ${portfolio.unrealizedPnl >= 0 ? 'text-green-400' : 'text-red-400'
@@ -93,7 +93,7 @@ export function PortfolioWidget() {
             {portfolio.unrealizedPnl.toFixed(2)}
           </div>
         </div>
-        <div className="bg-slate-800/30 rounded p-2">
+        <div className="p-2 rounded bg-slate-800/30">
           <div className="text-[10px] ">Realized PnL</div>
           <div
             className={`text-sm font-medium ${portfolio.totalPnl >= 0 ? 'text-green-400' : 'text-red-400'
@@ -105,7 +105,7 @@ export function PortfolioWidget() {
       </div>
 
       {/* Trade stats */}
-      <div className="flex items-center justify-between text-xs text-slate-200 border-t border-slate-700/50 pt-3">
+      <div className="flex items-center justify-between pt-3 text-xs border-t text-slate-200 border-slate-700/50">
         <span>Trades: {portfolio.totalTrades}</span>
         <span>
           Win Rate: {winRate.toFixed(0)}% ({portfolio.winCount}W/{portfolio.lossCount}L)

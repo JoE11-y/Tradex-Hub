@@ -1,13 +1,19 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import type {
   AssetSymbol,
   Candle,
   TimeInterval,
   OptionType,
   OptionExpiry,
-} from '../types';
-import { STARTING_BALANCE } from '../types';
-import { tradeApi, sessionApi, pricesApi, optionsApi, leaderboardApi } from '../services/api';
+} from "../types";
+import { STARTING_BALANCE } from "../types";
+import {
+  tradeApi,
+  sessionApi,
+  pricesApi,
+  optionsApi,
+  leaderboardApi,
+} from "../services/api";
 import type {
   PositionData,
   TradeData,
@@ -15,9 +21,12 @@ import type {
   OptionContractData,
   LeaderboardEntryData,
   SessionEndResult,
-} from '../services/api';
-import { calculateUnrealizedPnl, calculatePnlPercent } from '../services/tradingEngine';
-import { useGameStore } from './gameStore';
+} from "../services/api";
+import {
+  calculateUnrealizedPnl,
+  calculatePnlPercent,
+} from "../services/tradingEngine";
+import { useGameStore } from "./gameStore";
 
 interface TradingState {
   // Market data
@@ -48,7 +57,7 @@ interface TradingState {
 
   // Leaderboard
   leaderboardEntries: LeaderboardEntryData[];
-  leaderboardPeriod: 'weekly' | 'all_time';
+  leaderboardPeriod: "weekly" | "all_time";
   leaderboardLoading: boolean;
 
   // Loading states
@@ -68,16 +77,29 @@ interface TradingState {
   resetSession: () => Promise<void>;
 
   // Actions - trading (async -> backend)
-  openPosition: (params: { asset: AssetSymbol; side: string; leverage: number; margin: number; stop_loss?: number; take_profit?: number }) => Promise<void>;
+  openPosition: (params: {
+    asset: AssetSymbol;
+    side: string;
+    leverage: number;
+    margin: number;
+    stop_loss?: number;
+    take_profit?: number;
+  }) => Promise<void>;
   closePosition: (positionId: string) => Promise<void>;
 
   // Actions - options
   loadStrikes: (asset?: string) => Promise<void>;
-  openOption: (params: { asset: string; optionType: OptionType; strikePrice: number; expiry: OptionExpiry; premium: number }) => Promise<void>;
+  openOption: (params: {
+    asset: string;
+    optionType: OptionType;
+    strikePrice: number;
+    expiry: OptionExpiry;
+    premium: number;
+  }) => Promise<void>;
   handleOptionSettled: (option: OptionContractData) => void;
 
   // Actions - leaderboard
-  loadLeaderboard: (period?: 'weekly' | 'all_time') => Promise<void>;
+  loadLeaderboard: (period?: "weekly" | "all_time") => Promise<void>;
 
   // Actions - server push sync
   syncPortfolio: (balance: number, portfolio: PortfolioData) => void;
@@ -108,8 +130,8 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
   currentPrice: 0,
   prices: {},
   candles: [],
-  selectedAsset: 'XLM',
-  selectedInterval: '1m',
+  selectedAsset: "XLM",
+  selectedInterval: "1m",
   sessionId: null,
   positions: [],
   trades: [],
@@ -124,7 +146,7 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
   isOpeningOption: false,
   strikes: [],
   leaderboardEntries: [],
-  leaderboardPeriod: 'all_time',
+  leaderboardPeriod: "all_time",
   leaderboardLoading: false,
   isOpening: false,
   isClosing: null,
@@ -160,7 +182,7 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
         sessionActive: true,
       });
       // TODO: backend needs GET /api/options/active?session_id=X to restore active options on resume
-      useGameStore.getState().navigateTo('trading');
+      useGameStore.getState().navigateTo("trading");
     } catch {
       set({ sessionActive: false });
     }
@@ -178,7 +200,7 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
       activeOptions: [],
       optionTrades: [],
     });
-    useGameStore.getState().navigateTo('trading');
+    useGameStore.getState().navigateTo("trading");
   },
 
   endSession: async () => {
@@ -195,12 +217,12 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
     });
 
     // Refresh profile to get new achievements
-    const { playerApi } = await import('../services/api');
+    const { playerApi } = await import("../services/api");
     try {
       const profile = await playerApi.getProfile();
       useGameStore.getState().syncFromProfile(profile);
       const newAchievements = profile.achievements.filter(
-        (a) => !previousAchievements.includes(a)
+        (a) => !previousAchievements.includes(a),
       );
 
       useGameStore.getState().setSessionSummary({
@@ -222,7 +244,7 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
       });
     }
 
-    useGameStore.getState().navigateTo('summary');
+    useGameStore.getState().navigateTo("summary");
   },
 
   resetSession: async () => {
@@ -239,11 +261,13 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
     });
 
     // Refresh profile to sync XP after penalty
-    const { playerApi } = await import('../services/api');
+    const { playerApi } = await import("../services/api");
     try {
       const profile = await playerApi.getProfile();
       useGameStore.getState().syncFromProfile(profile);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   },
 
   openPosition: async (params) => {
@@ -269,7 +293,12 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
       set((s) => ({
         positions: s.positions.map((p) =>
           p.id === positionId
-            ? { ...p, status: 'closed', close_price: result.trade.close_price, pnl: result.trade.pnl }
+            ? {
+                ...p,
+                status: "closed",
+                close_price: result.trade.close_price,
+                pnl: result.trade.pnl,
+              }
             : p,
         ),
         trades: [...s.trades, result.trade],
@@ -289,7 +318,7 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
       const data = await optionsApi.getStrikes(selectedAsset);
       set({ strikes: data.strikes });
     } catch (err) {
-      console.error('Failed to load strikes:', err);
+      console.error("Failed to load strikes:", err);
     }
   },
 
@@ -340,7 +369,12 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
     set((s) => ({
       positions: s.positions.map((p) =>
         p.id === positionId
-          ? { ...p, status: 'liquidated', close_price: trade.close_price, pnl: trade.pnl }
+          ? {
+              ...p,
+              status: "liquidated",
+              close_price: trade.close_price,
+              pnl: trade.pnl,
+            }
           : p,
       ),
       trades: [...s.trades, trade],
@@ -363,7 +397,10 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
   loadCandles: async () => {
     const { selectedAsset, selectedInterval } = get();
     try {
-      const { candles } = await pricesApi.getCandles(selectedAsset, selectedInterval);
+      const { candles } = await pricesApi.getCandles(
+        selectedAsset,
+        selectedInterval,
+      );
       set({ candles });
       if (candles.length > 0) {
         const lastPrice = candles[candles.length - 1].close;
@@ -372,14 +409,17 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
         }));
       }
     } catch (err) {
-      console.error('Failed to load candles:', err);
+      console.error("Failed to load candles:", err);
     }
   },
 
   updateLastCandle: (candle) => {
     set((s) => {
       const candles = [...s.candles];
-      if (candles.length > 0 && candles[candles.length - 1].time === candle.time) {
+      if (
+        candles.length > 0 &&
+        candles[candles.length - 1].time === candle.time
+      ) {
         candles[candles.length - 1] = candle;
       } else {
         candles.push(candle);
@@ -388,21 +428,22 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
     });
   },
 
-  reset: () => set({
-    positions: [],
-    trades: [],
-    balance: STARTING_BALANCE,
-    portfolio: initialPortfolio,
-    sessionActive: false,
-    sessionId: null,
-    cooldownUntil: null,
-    drawdownLockoutUntil: null,
-    drawdownPct: null,
-    activeOptions: [],
-    optionTrades: [],
-    isOpeningOption: false,
-    strikes: [],
-    isOpening: false,
-    isClosing: null,
-  }),
+  reset: () =>
+    set({
+      positions: [],
+      trades: [],
+      balance: STARTING_BALANCE,
+      portfolio: initialPortfolio,
+      sessionActive: false,
+      sessionId: null,
+      cooldownUntil: null,
+      drawdownLockoutUntil: null,
+      drawdownPct: null,
+      activeOptions: [],
+      optionTrades: [],
+      isOpeningOption: false,
+      strikes: [],
+      isOpening: false,
+      isClosing: null,
+    }),
 }));

@@ -86,7 +86,7 @@ export function OrderPanel() {
   return (
     <div className="flex flex-col min-w-0 overflow-hidden">
       {/* Tab toggle */}
-      <div className="flex border-b border-slate-700/50 w-full">
+      {/* <div className="flex w-full border-b border-slate-700/50">
         <button
           onClick={() => setTab('futures')}
           className={`flex-1 py-2 text-xs font-semibold transition-colors truncate ${tab === 'futures'
@@ -105,13 +105,13 @@ export function OrderPanel() {
         >
           Binary Options
         </button>
-      </div>
+      </div> */}
 
       {tab === 'options' ? (
-        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-          <div className="text-3xl mb-3">🔮</div>
-          <h3 className="text-sm font-semibold text-white mb-1">Binary Options</h3>
-          <p className="text-xs text-slate-200 mb-3">Call/put options with configurable strike and expiry.</p>
+        <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+          <div className="mb-3 text-3xl">🔮</div>
+          <h3 className="mb-1 text-sm font-semibold text-white">Binary Options</h3>
+          <p className="mb-3 text-xs text-slate-200">Call/put options with configurable strike and expiry.</p>
           <span className="px-3 py-1 text-[10px] font-bold tracking-wider rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
             COMING SOON IN V2
           </span>
@@ -142,7 +142,7 @@ export function OrderPanel() {
 
           {/* Leverage */}
           <div>
-            <label className="text-xs text-slate-200 mb-1 block">Leverage</label>
+            <label className="block mb-1 text-xs text-slate-200">Leverage</label>
             <div className="flex gap-1">
               {LEVERAGE_OPTIONS.map((lev) => (
                 <button
@@ -164,7 +164,7 @@ export function OrderPanel() {
 
           {/* Margin input */}
           <div>
-            <label className="text-xs text-slate-200 mb-1 block">
+            <label className="block mb-1 text-xs text-slate-200">
               Margin (USDT)
             </label>
             <input
@@ -172,14 +172,14 @@ export function OrderPanel() {
               value={marginInput}
               onChange={(e) => setMarginInput(e.target.value)}
               placeholder="0.00"
-              className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="w-full px-3 py-2 text-sm text-white border rounded bg-slate-800 border-slate-700 focus:outline-none focus:border-indigo-500"
             />
             <div className="flex gap-1 mt-1">
               {[10, 25, 50, 100].map((pct) => (
                 <button
                   key={pct}
                   onClick={() => handlePercentClick(pct)}
-                  className="flex-1 py-1 text-xs text-slate-200 bg-slate-800 rounded hover:bg-slate-700 transition-colors"
+                  className="flex-1 py-1 text-xs transition-colors rounded text-slate-200 bg-slate-800 hover:bg-slate-700"
                 >
                   {pct}%
                 </button>
@@ -190,7 +190,7 @@ export function OrderPanel() {
           {/* Stop-Loss / Take-Profit */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-red-400 mb-1 block">Stop Loss</label>
+              <label className="block mb-1 text-xs text-red-400">Stop Loss</label>
               <input
                 type="number"
                 value={stopLossInput}
@@ -205,7 +205,7 @@ export function OrderPanel() {
               />
             </div>
             <div>
-              <label className="text-xs text-green-400 mb-1 block">Take Profit</label>
+              <label className="block mb-1 text-xs text-green-400">Take Profit</label>
               <input
                 type="number"
                 value={takeProfitInput}
@@ -249,7 +249,7 @@ export function OrderPanel() {
 
           {/* Error */}
           {error && (
-            <p className="text-xs text-red-400 text-center">{error}</p>
+            <p className="text-xs text-center text-red-400">{error}</p>
           )}
 
           {/* Submit */}
@@ -265,7 +265,7 @@ export function OrderPanel() {
           </button>
 
           {/* Balance */}
-          <div className="text-center text-xs ">
+          <div className="text-xs text-center ">
             Available: ${balance.toFixed(2)} | Positions: {openCount}/{MAX_POSITIONS}
           </div>
         </div>
