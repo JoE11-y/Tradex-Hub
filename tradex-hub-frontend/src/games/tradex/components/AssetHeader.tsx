@@ -10,17 +10,17 @@ export function AssetHeader() {
   const currentPrice = useTradingStore((s) => s.currentPrice);
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700/50 bg-slate-900/30 shrink-0">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-4 py-2 border-b border-slate-700/50 bg-slate-900/30 shrink-0 gap-1.5 sm:gap-0">
+      <div className="flex items-center gap-2 sm:gap-3">
         <span className="text-sm font-semibold text-white">
           {selectedAsset}/USDT
         </span>
-        <span className={`text-xl font-bold ${currentPrice > 0 ? 'text-white' : ''}`}>
+        <span className={`text-lg sm:text-xl font-bold ${currentPrice > 0 ? 'text-white' : ''}`}>
           ${currentPrice > 0 ? currentPrice.toFixed(currentPrice >= 100 ? 2 : 4) : '---'}
         </span>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         {TIMEFRAMES.map((tf) => (
           <button
             key={tf}

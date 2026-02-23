@@ -25,7 +25,7 @@ export function PortfolioWidget() {
     : 100;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
       {/* Level & XP */}
       <div>
         <div className="flex items-center justify-between mb-1.5">

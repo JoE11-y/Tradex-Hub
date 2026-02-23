@@ -179,7 +179,7 @@ export function OrderPanel() {
                 <button
                   key={pct}
                   onClick={() => handlePercentClick(pct)}
-                  className="flex-1 py-1 text-xs transition-colors rounded text-slate-200 bg-slate-800 hover:bg-slate-700"
+                  className="flex-1 py-1 min-h-[36px] md:min-h-0 text-xs transition-colors rounded text-slate-200 bg-slate-800 hover:bg-slate-700"
                 >
                   {pct}%
                 </button>

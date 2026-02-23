@@ -49,20 +49,20 @@ export function TradingPage() {
     <div className="flex flex-col h-full">
       <TickerBar />
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
         {/* Left: Chart + bottom tabs */}
         <div className="flex-1 flex flex-col min-w-0">
           <AssetHeader />
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 h-[50vh] md:h-auto">
             <TradingChart />
           </div>
-          <div className="h-48 shrink-0 border-t border-slate-700/50">
+          <div className="h-32 md:h-48 shrink-0 border-t border-slate-700/50">
             <BottomTabs tabs={bottomTabs} />
           </div>
         </div>
 
         {/* Right sidebar */}
-        <div className="w-[500px] shrink-0 border-l border-slate-700/50 flex flex-col overflow-hidden bg-slate-900/50">
+        <div className="w-full md:w-[500px] md:shrink-0 border-t md:border-t-0 md:border-l border-slate-700/50 flex flex-col overflow-hidden bg-slate-900/50">
           {/* End Session bar at top of sidebar */}
           <div className="border-b border-slate-700/50 p-3 flex items-center justify-between">
             <div className="flex items-center gap-3">

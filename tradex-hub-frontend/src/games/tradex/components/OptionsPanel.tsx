@@ -125,7 +125,7 @@ export function OptionsPanel() {
             <button
               key={s}
               onClick={() => setSelectedStrike(s)}
-              className={`flex-1 min-w-0 py-1.5 text-[10px] font-medium rounded transition-colors ${selectedStrike === s
+              className={`flex-1 min-w-[60px] py-1.5 min-h-[36px] md:min-h-0 text-[10px] sm:text-xs font-medium rounded transition-colors ${selectedStrike === s
                 ? 'bg-indigo-600 text-white'
                 : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
                 }`}
@@ -144,12 +144,12 @@ export function OptionsPanel() {
       {/* Expiry selector */}
       <div>
         <label className="text-xs text-slate-200 mb-1 block">Expiry</label>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {EXPIRY_OPTIONS.map((e) => (
             <button
               key={e}
               onClick={() => setExpiry(e)}
-              className={`flex-1 py-1.5 text-xs font-medium rounded transition-colors ${expiry === e
+              className={`flex-1 py-1.5 min-h-[36px] md:min-h-0 text-xs font-medium rounded transition-colors ${expiry === e
                 ? 'bg-indigo-600 text-white'
                 : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
                 }`}

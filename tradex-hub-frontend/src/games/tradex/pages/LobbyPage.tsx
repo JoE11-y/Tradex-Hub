@@ -87,17 +87,17 @@ export function LobbyPage() {
     addr.length > 12 ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : addr;
 
   return (
-    <div className="h-full p-4 overflow-auto">
+    <div className="h-full p-3 sm:p-4 overflow-auto">
       <div className="max-w-6xl mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Hero Section */}
         <div className="py-6 text-center border rounded-xl bg-gradient-to-br from-indigo-900/20 via-slate-900/10 to-cyan-900/20 border-slate-800/30 animate-gradient-shift">
-          <h2 className="mb-2 text-3xl font-bold text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text">
+          <h2 className="mb-2 text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text">
             Welcome to Tradex
           </h2>
           <p className="mb-3 text-sm text-slate-200">
             Learn to trade. Prove it on-chain.
           </p>
-          <div className="flex items-center justify-center gap-4 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs">
             <span className="flex items-center gap-1.5 text-indigo-300">
               <span className="w-5 h-5 rounded-full bg-indigo-600/80 flex items-center justify-center text-[10px] font-bold text-white">{level}</span>
               {levelInfo.title}

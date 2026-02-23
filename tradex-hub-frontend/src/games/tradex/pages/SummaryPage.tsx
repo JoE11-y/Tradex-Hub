@@ -55,7 +55,7 @@ export function SummaryPage() {
   const animatedReturn = useCountUp(returnPct, 1500);
 
   return (
-    <div className="h-full overflow-auto p-4 relative">
+    <div className="h-full overflow-auto p-3 sm:p-4 relative">
       {/* Confetti for profitable sessions */}
       {isProfit && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
@@ -81,7 +81,7 @@ export function SummaryPage() {
           : 'bg-gradient-to-br from-red-900/30 to-rose-900/20 border-red-500/20'
           }`}>
           <div className="text-sm text-slate-200 mb-1">Session Result</div>
-          <div className={`text-4xl font-bold mb-1 ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
+          <div className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-1 ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
             {isProfit ? '+' : ''}${animatedPnl.toFixed(2)}
           </div>
           <div className={`text-sm font-medium ${isProfit ? 'text-green-500/70' : 'text-red-500/70'}`}>

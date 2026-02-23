@@ -82,8 +82,8 @@ export function PredictionPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800/50 shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-4 py-2 border-b border-slate-800/50 shrink-0 gap-2 sm:gap-0">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={() => navigateTo('lobby')}
             className="text-xs text-slate-200 hover:text-white transition-colors"
@@ -98,7 +98,7 @@ export function PredictionPage() {
               <button
                 key={a}
                 onClick={() => setSelectedAsset(a)}
-                className={`px-2 py-0.5 text-[10px] rounded ${selectedAsset === a
+                className={`px-2.5 py-1 min-h-[32px] text-[10px] sm:text-xs rounded ${selectedAsset === a
                   ? 'bg-indigo-600 text-white'
                   : 'bg-slate-800 text-slate-200 hover:text-white'
                   }`}
@@ -114,7 +114,7 @@ export function PredictionPage() {
               <button
                 key={tf}
                 onClick={() => setSelectedTimeframe(tf)}
-                className={`px-2 py-0.5 text-[10px] rounded ${selectedTimeframe === tf
+                className={`px-2.5 py-1 min-h-[32px] text-[10px] sm:text-xs rounded ${selectedTimeframe === tf
                   ? 'bg-indigo-600 text-white'
                   : 'bg-slate-800 text-slate-200 hover:text-white'
                   }`}
@@ -125,7 +125,7 @@ export function PredictionPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Stats */}
           {stats && (
             <div className="flex items-center gap-2 text-[10px] ">
@@ -177,11 +177,11 @@ export function PredictionPage() {
           <div className="space-y-3">
             <p className="text-xs text-slate-200 text-center">Where is the price headed?</p>
 
-            <div className="flex items-center justify-center gap-3 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 max-w-md mx-auto">
               <button
                 onClick={() => handlePredict('up')}
                 disabled={loading || !challenge}
-                className="flex-1 py-4 bg-green-600/80 hover:bg-green-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 text-base flex items-center justify-center gap-2 active:scale-95 hover:shadow-lg hover:shadow-green-500/20"
+                className="flex-1 w-full sm:w-auto py-4 bg-green-600/80 hover:bg-green-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 text-base flex items-center justify-center gap-2 active:scale-95 hover:shadow-lg hover:shadow-green-500/20"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5m-7 7l7-7 7 7" /></svg>
                 UP
@@ -189,7 +189,7 @@ export function PredictionPage() {
               <button
                 onClick={() => handlePredict('sideways')}
                 disabled={loading || !challenge}
-                className="px-6 py-4 bg-slate-600/80 hover:bg-slate-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 text-sm flex items-center justify-center gap-2 active:scale-95"
+                className="w-full sm:w-auto px-6 py-4 bg-slate-600/80 hover:bg-slate-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 text-sm flex items-center justify-center gap-2 active:scale-95"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14" /></svg>
                 FLAT
@@ -197,7 +197,7 @@ export function PredictionPage() {
               <button
                 onClick={() => handlePredict('down')}
                 disabled={loading || !challenge}
-                className="flex-1 py-4 bg-red-600/80 hover:bg-red-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 text-base flex items-center justify-center gap-2 active:scale-95 hover:shadow-lg hover:shadow-red-500/20"
+                className="flex-1 w-full sm:w-auto py-4 bg-red-600/80 hover:bg-red-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 text-base flex items-center justify-center gap-2 active:scale-95 hover:shadow-lg hover:shadow-red-500/20"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14m7-7l-7 7-7-7" /></svg>
                 DOWN

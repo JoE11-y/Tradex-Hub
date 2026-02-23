@@ -45,7 +45,7 @@ export function BadgeCollection() {
 
   return (
     <div>
-      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
         {BADGE_DEFS.map((def) => {
           const status = badgeStatusMap.get(def.id);
           const eligible = status?.eligible ?? false;

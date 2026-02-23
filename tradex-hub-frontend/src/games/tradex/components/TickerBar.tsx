@@ -8,7 +8,7 @@ export function TickerBar() {
   const prices = useTradingStore((s) => s.prices);
 
   return (
-    <div className="flex items-stretch bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/50 shrink-0">
+    <div className="flex flex-wrap items-stretch bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/50 shrink-0">
       {SUPPORTED_ASSETS.map((asset) => {
         const price = prices[asset.symbol] || 0;
         const isSelected = selectedAsset === asset.symbol;
@@ -17,15 +17,15 @@ export function TickerBar() {
           <button
             key={asset.symbol}
             onClick={() => setSelectedAsset(asset.symbol as AssetSymbol)}
-            className={`flex-1 px-4 py-2.5 flex items-center justify-center gap-3 transition-colors ${isSelected
+            className={`flex-1 min-w-0 px-2 py-1.5 md:px-4 md:py-2.5 flex items-center justify-center gap-1.5 md:gap-3 transition-colors ${isSelected
                 ? 'bg-slate-800/60 border-b-2 border-indigo-500'
                 : 'hover:bg-slate-800/30 border-b-2 border-transparent'
               }`}
           >
-            <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+            <span className={`text-xs md:text-sm font-semibold ${isSelected ? 'text-white' : 'text-slate-300'}`}>
               {asset.symbol}
             </span>
-            <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+            <span className={`text-xs md:text-sm font-medium ${isSelected ? 'text-white' : 'text-slate-200'}`}>
               ${price > 0 ? price.toFixed(price >= 100 ? 2 : 4) : '---'}
             </span>
           </button>

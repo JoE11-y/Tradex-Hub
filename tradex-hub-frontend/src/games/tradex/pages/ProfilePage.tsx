@@ -19,13 +19,13 @@ export function ProfilePage() {
   }, [refreshPlayer, syncFromProfile]);
 
   return (
-    <div className="h-full overflow-auto p-4">
-      <div className="max-w-3xl mx-auto space-y-5">
+    <div className="h-full overflow-auto p-3 sm:p-4">
+      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-5">
         {/* Player card */}
         <PlayerCard />
 
         {/* Stats panel */}
-        <div className="bg-slate-900/80 rounded-xl border border-slate-800/50 p-5">
+        <div className="bg-slate-900/80 rounded-xl border border-slate-800/50 p-3 sm:p-5">
           <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-3">Lifetime Stats</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-slate-800/50 rounded-lg p-3 text-center">
@@ -77,13 +77,13 @@ export function ProfilePage() {
         </div>
 
         {/* Badge collection */}
-        <div className="bg-slate-900/80 rounded-xl border border-slate-800/50 p-5">
+        <div className="bg-slate-900/80 rounded-xl border border-slate-800/50 p-3 sm:p-5">
           <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-3">Badge Collection</h3>
           <BadgeCollection />
         </div>
 
         {/* Achievements */}
-        <div className="bg-slate-900/80 rounded-xl border border-slate-800/50 p-5">
+        <div className="bg-slate-900/80 rounded-xl border border-slate-800/50 p-3 sm:p-5">
           <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-3">Achievements</h3>
           <AchievementGrid />
         </div>

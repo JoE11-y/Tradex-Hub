@@ -51,7 +51,7 @@ export function PlayerCard({ compact }: PlayerCardProps) {
   }
 
   return (
-    <div className="bg-slate-900/80 rounded-xl p-5 border border-slate-800/50">
+    <div className="bg-slate-900/80 rounded-xl p-3 sm:p-5 border border-slate-800/50">
       <div className="flex items-center gap-4 mb-4">
         <div className={`w-14 h-14 rounded-full ${LEVEL_COLORS[level] || 'bg-indigo-600'} flex items-center justify-center text-xl font-bold text-white shrink-0 ring-2 ring-indigo-400/30`}>
           {level}
@@ -82,7 +82,7 @@ export function PlayerCard({ compact }: PlayerCardProps) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
         <div className="text-center">
           <div className="text-lg font-bold text-white">{player?.total_trades || 0}</div>
           <div className="text-[10px] ">Trades</div>
