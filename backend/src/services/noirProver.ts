@@ -4,18 +4,22 @@
  * Replaces CLI-based nargo execute + bb prove pipeline with programmatic API.
  * Matches the approach used by ProofBridge.
  */
-import { readFileSync } from 'fs';
-import { join, resolve } from 'path';
-import { Noir } from '@noir-lang/noir_js';
-import { UltraHonkBackend } from '@aztec/bb.js';
-import { CONFIG } from '../config';
+import { readFileSync } from "fs";
+import { join, resolve } from "path";
+import { Noir } from "@noir-lang/noir_js";
+import { UltraHonkBackend } from "@aztec/bb.js";
+import { CONFIG } from "../config";
 
 // Circuit JSON type (compiled Noir output)
 interface CompiledCircuit {
   noir_version: string;
   hash: string;
   abi: {
-    parameters: Array<{ name: string; type: { kind: string }; visibility: string }>;
+    parameters: Array<{
+      name: string;
+      type: { kind: string };
+      visibility: string;
+    }>;
     return_type: null | { kind: string };
   };
   bytecode: string;
@@ -35,14 +39,14 @@ function getCircuit(circuitDir: string, circuitName: string): CircuitInstance {
   const cached = circuitCache.get(cacheKey);
   if (cached) return cached;
 
-  const jsonPath = join(circuitDir, 'target', `${circuitName}.json`);
+  const jsonPath = join(circuitDir, `${circuitName}.json`);
   let raw: string;
   try {
-    raw = readFileSync(jsonPath, 'utf-8');
+    raw = readFileSync(jsonPath, "utf-8");
   } catch {
     throw new Error(
       `Circuit not compiled. Run: cd ${circuitDir} && nargo compile\n` +
-      `Expected compiled circuit at: ${jsonPath}`,
+        `Expected compiled circuit at: ${jsonPath}`,
     );
   }
   const circuit: CompiledCircuit = JSON.parse(raw);
@@ -53,7 +57,9 @@ function getCircuit(circuitDir: string, circuitName: string): CircuitInstance {
   const instance: CircuitInstance = { noir, backend };
   circuitCache.set(cacheKey, instance);
 
-  console.log(`[noirProver] Loaded circuit: ${circuitName} (noir ${circuit.noir_version})`);
+  console.log(
+    `[noirProver] Loaded circuit: ${circuitName} (noir ${circuit.noir_version})`,
+  );
   return instance;
 }
 
@@ -66,20 +72,26 @@ export const noirProver = {
   /**
    * Generate a proof for the badge_proof circuit.
    */
-  async generateBadgeProof(inputs: Record<string, string>): Promise<ProofResult> {
+  async generateBadgeProof(
+    inputs: Record<string, string>,
+  ): Promise<ProofResult> {
     const circuitDir = resolve(CONFIG.BADGE_CIRCUIT_DIR);
-    const { noir, backend } = getCircuit(circuitDir, 'badge_proof');
+    const { noir, backend } = getCircuit(circuitDir, "badge_proof");
 
-    console.log('[noirProver] Executing badge_proof witness...');
+    console.log("[noirProver] Executing badge_proof witness...");
     const { witness } = await noir.execute(inputs);
 
-    console.log('[noirProver] Generating badge_proof proof...');
-    const { proof, publicInputs } = await backend.generateProof(witness, { keccak: true });
+    console.log("[noirProver] Generating badge_proof proof...");
+    const { proof, publicInputs } = await backend.generateProof(witness, {
+      keccak: true,
+    });
 
-    const proofHex = Buffer.from(proof).toString('hex');
+    const proofHex = Buffer.from(proof).toString("hex");
     const publicInputsHex = publicInputsToBytes(publicInputs);
 
-    console.log(`[noirProver] Badge proof: ${proof.byteLength} bytes, ${publicInputs.length} public inputs`);
+    console.log(
+      `[noirProver] Badge proof: ${proof.byteLength} bytes, ${publicInputs.length} public inputs`,
+    );
 
     return { proofHex, publicInputsHex };
   },
@@ -92,10 +104,10 @@ export const noirProver = {
 function publicInputsToBytes(publicInputs: string[]): string {
   const buffers = publicInputs.map((pi) => {
     // Each public input is a hex string (with or without 0x prefix)
-    const hex = pi.startsWith('0x') ? pi.slice(2) : pi;
-    const buf = Buffer.from(hex.padStart(64, '0'), 'hex');
+    const hex = pi.startsWith("0x") ? pi.slice(2) : pi;
+    const buf = Buffer.from(hex.padStart(64, "0"), "hex");
     // Take last 32 bytes if longer (shouldn't happen, but safety)
     return buf.length > 32 ? buf.subarray(buf.length - 32) : buf;
   });
-  return Buffer.concat(buffers).toString('hex');
+  return Buffer.concat(buffers).toString("hex");
 }

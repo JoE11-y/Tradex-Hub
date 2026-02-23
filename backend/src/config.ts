@@ -40,7 +40,7 @@ export const CONFIG = {
 
   // Risk management
   DAILY_DRAWDOWN_LIMIT_PCT: 0.05,
-  RESET_XP_PENALTY_PCT: 0.10,
+  RESET_XP_PENALTY_PCT: 0.1,
   RESET_COOLDOWN_MS: 300_000,
 
   // Prediction settings
@@ -50,7 +50,7 @@ export const CONFIG = {
   PREDICTION_MAX_MONTHS_AGO: 24,
 
   // ZK proof pipeline (badge proofs only)
-  BADGE_CIRCUIT_DIR: process.env.BADGE_CIRCUIT_DIR || "../circuits/badge_proof",
+  BADGE_CIRCUIT_DIR: process.env.BADGE_CIRCUIT_DIR || "./src/circuit",
 
   // Soroban contract
   TRADEX_HUB_CONTRACT_ID:
