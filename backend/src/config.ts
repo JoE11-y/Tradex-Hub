@@ -7,7 +7,7 @@ export const CONFIG = {
   LEADERBOARD_REBUILD_INTERVAL_MS: 30_000,
   OPTION_CHECK_INTERVAL_MS: 1000,
   AUTH_TOKEN_TTL_MS: 24 * 60 * 60 * 1000, // 24 hours
-  DEV_MODE: process.env.NODE_ENV !== "production",
+  DEV_MODE: process.env.NODE_ENV === "production",
   CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
 
   // Trading constants
