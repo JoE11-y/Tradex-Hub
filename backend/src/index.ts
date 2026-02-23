@@ -1,5 +1,6 @@
 import { CONFIG } from './config';
 import { initDb, closeDb } from './db/connection';
+import { playerRepo } from './db/repositories/playerRepo';
 import { createApp } from './api/routes';
 import { startPricePolling, stopPricePolling } from './services/priceService';
 import { initLiquidationLoop } from './services/tradingEngine';
@@ -25,6 +26,20 @@ const pendingWsTokens = new Map<string, string>();
 function start(): void {
   // Initialize database
   initDb();
+
+  // Seed dev players so they get stable IDs (1 and 2) on a fresh DB
+  if (CONFIG.DEV_MODE) {
+    const p1 = process.env.VITE_DEV_PLAYER1_ADDRESS;
+    const p2 = process.env.VITE_DEV_PLAYER2_ADDRESS;
+    if (p1 && !playerRepo.findByWallet(p1)) {
+      const player = playerRepo.create(p1, 'Dev Player 1');
+      console.log(`[seed] Created dev player 1: id=${player.id} wallet=${p1.slice(0, 8)}...`);
+    }
+    if (p2 && !playerRepo.findByWallet(p2)) {
+      const player = playerRepo.create(p2, 'Dev Player 2');
+      console.log(`[seed] Created dev player 2: id=${player.id} wallet=${p2.slice(0, 8)}...`);
+    }
+  }
 
   // Initialize data
   patternService.init();

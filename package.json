@@ -10,7 +10,11 @@
     "create": "bun run scripts/create.ts",
     "publish": "bun run scripts/publish.ts",
     "dev": "bun --cwd=sgs_frontend run dev",
-    "dev:game": "bun run scripts/dev-game.ts"
+    "dev:game": "bun run scripts/dev-game.ts",
+    "dev:backend": "bun --cwd=backend run dev",
+    "start:backend": "bun --cwd=backend run start",
+    "build:circuits": "./scripts/build-badge-circuit.sh",
+    "build:circuits:prove": "./scripts/build-badge-circuit.sh --prove"
   },
   "devDependencies": {
     "@types/bun": "latest"

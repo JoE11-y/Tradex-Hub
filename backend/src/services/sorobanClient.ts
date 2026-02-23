@@ -134,6 +134,37 @@ export const sorobanClient = {
     return !!(CONFIG.TRADEX_HUB_CONTRACT_ID && CONFIG.SERVER_SECRET_KEY);
   },
 
+  /** Register a player on-chain (idempotent — safe to call multiple times) */
+  async registerPlayer(
+    playerWalletAddress: string,
+  ): Promise<{ txHash: string }> {
+    const keypair = getServerKeypair();
+
+    const args = [
+      new Address(keypair.publicKey()).toScVal(), // admin
+      new Address(playerWalletAddress).toScVal(),
+    ];
+
+    try {
+      const { txHash } = await invokeContract("register_player", args, keypair);
+      console.log(
+        `[sorobanClient] register_player tx: ${txHash} for ${playerWalletAddress}`,
+      );
+      return { txHash };
+    } catch (e) {
+      // Idempotent — if already registered, contract may return error. That's fine.
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("already") || msg.includes("PlayerAlreadyRegistered")) {
+        console.log(
+          `[sorobanClient] Player ${playerWalletAddress} already registered on-chain`,
+        );
+        return { txHash: "" };
+      }
+      console.warn(`[sorobanClient] register_player failed: ${msg}`);
+      return { txHash: "" };
+    }
+  },
+
   /** Mint a badge NFT on-chain via mint_badge (server submits on behalf of player) */
   async mintBadge(
     playerWalletAddress: string,
@@ -153,7 +184,11 @@ export const sorobanClient = {
       xdr.ScVal.scvBytes(hexToBytes(proofHex)), // proof_bytes
     ];
 
-    const { txHash, returnVal } = await invokeContract("mint_badge", args, keypair);
+    const { txHash, returnVal } = await invokeContract(
+      "mint_badge",
+      args,
+      keypair,
+    );
 
     // Contract returns Result<u32, Error> — extract token_id
     let tokenId = 0;
@@ -161,12 +196,15 @@ export const sorobanClient = {
       try {
         tokenId = scValToNative(returnVal) as number;
       } catch {
-        console.warn("[sorobanClient] Could not parse token_id from return value");
+        console.warn(
+          "[sorobanClient] Could not parse token_id from return value",
+        );
       }
     }
 
-    console.log(`[sorobanClient] mint_badge tx: ${txHash}, tokenId: ${tokenId}`);
+    console.log(
+      `[sorobanClient] mint_badge tx: ${txHash}, tokenId: ${tokenId}`,
+    );
     return { txHash, tokenId };
   },
-
 };

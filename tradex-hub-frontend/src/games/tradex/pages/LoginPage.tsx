@@ -53,7 +53,7 @@ export function LoginPage() {
           <p className="mt-1 text-xs text-slate-600">ZK-verified on Stellar Soroban</p>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 flex flex-col gap-2.5">
           <button
             onClick={handleWalletLogin}
             disabled={loading !== null}

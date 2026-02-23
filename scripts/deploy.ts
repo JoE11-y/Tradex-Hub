@@ -12,8 +12,12 @@ import { existsSync } from "node:fs";
 import { unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readEnvFile, getEnvValue } from './utils/env';
-import { getWorkspaceContracts, listContractNames, selectContracts } from "./utils/contracts";
+import { readEnvFile, getEnvValue } from "./utils/env";
+import {
+  getWorkspaceContracts,
+  listContractNames,
+  selectContracts,
+} from "./utils/contracts";
 
 type StellarKeypair = {
   publicKey(): string;
@@ -30,7 +34,9 @@ async function loadKeypairFactory(): Promise<StellarKeypairFactory> {
     const sdk = await import("@stellar/stellar-sdk");
     return sdk.Keypair;
   } catch (error) {
-    console.warn("⚠️  @stellar/stellar-sdk is not installed. Running `bun install`...");
+    console.warn(
+      "⚠️  @stellar/stellar-sdk is not installed. Running `bun install`...",
+    );
     try {
       await $`bun install`;
       const sdk = await import("@stellar/stellar-sdk");
@@ -57,30 +63,41 @@ Examples:
 console.log("🚀 Deploying contracts to Stellar testnet...\n");
 const Keypair = await loadKeypairFactory();
 
-const NETWORK = 'testnet';
-const RPC_URL = 'https://soroban-testnet.stellar.org';
-const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
-const EXISTING_GAME_HUB_TESTNET_CONTRACT_ID = 'CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG';
+const NETWORK = "testnet";
+const RPC_URL = "https://soroban-testnet.stellar.org";
+const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
+const EXISTING_GAME_HUB_TESTNET_CONTRACT_ID =
+  "CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG";
 
 async function testnetAccountExists(address: string): Promise<boolean> {
-  const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${address}`, { method: 'GET' });
+  const res = await fetch(
+    `https://horizon-testnet.stellar.org/accounts/${address}`,
+    { method: "GET" },
+  );
   if (res.status === 404) return false;
-  if (!res.ok) throw new Error(`Horizon error ${res.status} checking ${address}`);
+  if (!res.ok)
+    throw new Error(`Horizon error ${res.status} checking ${address}`);
   return true;
 }
 
 async function ensureTestnetFunded(address: string): Promise<void> {
   if (await testnetAccountExists(address)) return;
   console.log(`💰 Funding ${address} via friendbot...`);
-  const fundRes = await fetch(`https://friendbot.stellar.org?addr=${address}`, { method: 'GET' });
+  const fundRes = await fetch(`https://friendbot.stellar.org?addr=${address}`, {
+    method: "GET",
+  });
   if (!fundRes.ok) {
-    throw new Error(`Friendbot funding failed (${fundRes.status}) for ${address}`);
+    throw new Error(
+      `Friendbot funding failed (${fundRes.status}) for ${address}`,
+    );
   }
   for (let attempt = 0; attempt < 5; attempt++) {
     await new Promise((r) => setTimeout(r, 750));
     if (await testnetAccountExists(address)) return;
   }
-  throw new Error(`Funded ${address} but it still doesn't appear on Horizon yet`);
+  throw new Error(
+    `Funded ${address} but it still doesn't appear on Horizon yet`,
+  );
 }
 
 async function testnetContractExists(contractId: string): Promise<boolean> {
@@ -126,7 +143,9 @@ if (selection.unknown.length > 0 || selection.ambiguous.length > 0) {
 const contracts = selection.contracts;
 const mock = allContracts.find((c) => c.isMockHub);
 if (!mock) {
-  console.error("❌ Error: mock-game-hub contract not found in workspace members");
+  console.error(
+    "❌ Error: mock-game-hub contract not found in workspace members",
+  );
   process.exit(1);
 }
 
@@ -138,7 +157,8 @@ const shouldEnsureMock = deployMockRequested || needsMock;
 const missingWasm: string[] = [];
 for (const contract of contracts) {
   if (contract.isMockHub) continue;
-  if (!await Bun.file(contract.wasmPath).exists()) missingWasm.push(contract.wasmPath);
+  if (!(await Bun.file(contract.wasmPath).exists()))
+    missingWasm.push(contract.wasmPath);
 }
 if (missingWasm.length > 0) {
   console.error("❌ Error: Missing WASM build outputs:");
@@ -159,11 +179,11 @@ let existingSecrets: Record<string, string | null> = {
   player2: null,
 };
 
-const existingEnv = await readEnvFile('.env');
-for (const identity of ['player1', 'player2']) {
+const existingEnv = await readEnvFile(".env");
+for (const identity of ["player1", "player2"]) {
   const key = `VITE_DEV_${identity.toUpperCase()}_SECRET`;
   const v = getEnvValue(existingEnv, key);
-  if (v && v !== 'NOT_AVAILABLE') existingSecrets[identity] = v;
+  if (v && v !== "NOT_AVAILABLE") existingSecrets[identity] = v;
 }
 
 // Load existing deployment info so partial deploys can preserve other IDs.
@@ -172,13 +192,19 @@ let existingDeployment: any = null;
 if (existsSync("deployment.json")) {
   try {
     existingDeployment = await Bun.file("deployment.json").json();
-    if (existingDeployment?.contracts && typeof existingDeployment.contracts === "object") {
+    if (
+      existingDeployment?.contracts &&
+      typeof existingDeployment.contracts === "object"
+    ) {
       Object.assign(existingContractIds, existingDeployment.contracts);
     } else {
       // Backwards compatible fallback
-      if (existingDeployment?.mockGameHubId) existingContractIds["mock-game-hub"] = existingDeployment.mockGameHubId;
-      if (existingDeployment?.twentyOneId) existingContractIds["twenty-one"] = existingDeployment.twentyOneId;
-      if (existingDeployment?.numberGuessId) existingContractIds["number-guess"] = existingDeployment.numberGuessId;
+      if (existingDeployment?.mockGameHubId)
+        existingContractIds["mock-game-hub"] = existingDeployment.mockGameHubId;
+      if (existingDeployment?.twentyOneId)
+        existingContractIds["twenty-one"] = existingDeployment.twentyOneId;
+      if (existingDeployment?.numberGuessId)
+        existingContractIds["number-guess"] = existingDeployment.numberGuessId;
     }
   } catch (error) {
     console.warn("⚠️  Warning: Failed to parse deployment.json, continuing...");
@@ -192,25 +218,27 @@ for (const contract of allContracts) {
 }
 
 // Handle admin identity (needs to be in Stellar CLI for deployment)
-console.log('Setting up admin identity...');
-console.log('📝 Generating new admin identity...');
+console.log("Setting up admin identity...");
+console.log("📝 Generating new admin identity...");
 const adminKeypair = Keypair.random();
 
 walletAddresses.admin = adminKeypair.publicKey();
 
 try {
   await ensureTestnetFunded(walletAddresses.admin);
-  console.log('✅ admin funded');
+  console.log("✅ admin funded");
 } catch (error) {
-  console.error('❌ Failed to ensure admin is funded. Deployment cannot proceed.');
+  console.error(
+    "❌ Failed to ensure admin is funded. Deployment cannot proceed.",
+  );
   process.exit(1);
 }
 
 // Handle player identities (don't need to be in CLI, just keypairs)
-for (const identity of ['player1', 'player2']) {
+for (const identity of ["player1", "player2"]) {
   console.log(`Setting up ${identity}...`);
 
-  let keypair: Keypair;
+  let keypair: StellarKeypair;
   if (existingSecrets[identity]) {
     console.log(`✅ Using existing ${identity} from .env`);
     keypair = Keypair.fromSecret(existingSecrets[identity]!);
@@ -228,7 +256,9 @@ for (const identity of ['player1', 'player2']) {
     await ensureTestnetFunded(keypair.publicKey());
     console.log(`✅ ${identity} funded\n`);
   } catch (error) {
-    console.warn(`⚠️  Warning: Failed to ensure ${identity} is funded, continuing anyway...`);
+    console.warn(
+      `⚠️  Warning: Failed to ensure ${identity} is funded, continuing anyway...`,
+    );
   }
 }
 
@@ -264,16 +294,20 @@ if (shouldEnsureMock) {
 
   if (mockGameHubId) {
     deployed[mock.packageName] = mockGameHubId;
-    console.log(`✅ Using existing ${mock.packageName} on testnet: ${mockGameHubId}\n`);
+    console.log(
+      `✅ Using existing ${mock.packageName} on testnet: ${mockGameHubId}\n`,
+    );
   } else {
-    if (!await Bun.file(mock.wasmPath).exists()) {
+    if (!(await Bun.file(mock.wasmPath).exists())) {
       console.error("❌ Error: Missing WASM build output for mock-game-hub:");
       console.error(`  - ${mock.wasmPath}`);
       console.error("\nRun 'bun run build mock-game-hub' first");
       process.exit(1);
     }
 
-    console.warn(`⚠️  ${mock.packageName} not found on testnet (archived or reset). Deploying a new one...`);
+    console.warn(
+      `⚠️  ${mock.packageName} not found on testnet (archived or reset). Deploying a new one...`,
+    );
     console.log(`Deploying ${mock.packageName}...`);
     try {
       const result =
@@ -290,8 +324,12 @@ if (shouldEnsureMock) {
 
 // Generate attestor keypair for tradex-hub (Ed25519 via Stellar SDK)
 const attestorKeypair = Keypair.random();
-const attestorSecretHex = Buffer.from(attestorKeypair.rawSecretKey()).toString("hex");
-const attestorPubkeyHex = Buffer.from(attestorKeypair.rawPublicKey()).toString("hex");
+const attestorSecretHex = Buffer.from(attestorKeypair.rawSecretKey()).toString(
+  "hex",
+);
+const attestorPubkeyHex = Buffer.from(attestorKeypair.rawPublicKey()).toString(
+  "hex",
+);
 
 for (const contract of contracts) {
   if (contract.isMockHub) continue;
@@ -325,13 +363,35 @@ for (const contract of contracts) {
       const badgeVkPath = "circuits/badge_proof/target/vk";
       if (existsSync(badgeVkPath)) {
         console.log("  Setting badge verification key...");
-        const badgeVkHex = Buffer.from(await Bun.file(badgeVkPath).arrayBuffer()).toString("hex");
+        const badgeVkHex = Buffer.from(
+          await Bun.file(badgeVkPath).arrayBuffer(),
+        ).toString("hex");
         await $`stellar contract invoke --id ${contractId} --source-account ${adminSecret} --network ${NETWORK} -- set_badge_vk --vk_bytes ${badgeVkHex}`;
         console.log(`✅ Badge VK set on ${contractId}\n`);
       } else {
-        console.warn(`⚠️  Badge VK not found at ${badgeVkPath}, skipping set_badge_vk`);
+        console.warn(
+          `⚠️  Badge VK not found at ${badgeVkPath}, skipping set_badge_vk`,
+        );
         console.warn("  Run: ./scripts/build-badge-circuit.sh first\n");
       }
+
+      // Register dev players so they have on-chain records ready
+      for (const [label, address] of [
+        ["Player 1", walletAddresses.player1],
+        ["Player 2", walletAddresses.player2],
+      ]) {
+        if (!address) continue;
+        try {
+          console.log(`  Registering ${label} on tradex-hub...`);
+          await $`stellar contract invoke --id ${contractId} --source-account ${adminSecret} --network ${NETWORK} -- register_player --admin ${adminAddress} --player ${address}`;
+          console.log(`✅ ${label} registered: ${address}`);
+        } catch {
+          console.log(
+            `  ${label} already registered (or registration skipped)`,
+          );
+        }
+      }
+      console.log();
     }
   } catch (error) {
     console.error(`❌ Failed to deploy ${contract.packageName}:`, error);
@@ -353,10 +413,13 @@ for (const contract of allContracts) {
 const twentyOneId = deployed["twenty-one"] || "";
 const numberGuessId = deployed["number-guess"] || "";
 
-const deploymentContracts = allContracts.reduce<Record<string, string>>((acc, contract) => {
-  acc[contract.packageName] = deployed[contract.packageName] || "";
-  return acc;
-}, {});
+const deploymentContracts = allContracts.reduce<Record<string, string>>(
+  (acc, contract) => {
+    acc[contract.packageName] = deployed[contract.packageName] || "";
+    return acc;
+  },
+  {},
+);
 
 const deploymentInfo = {
   mockGameHubId,
@@ -375,11 +438,17 @@ const deploymentInfo = {
   deployedAt: new Date().toISOString(),
 };
 
-await Bun.write('deployment.json', JSON.stringify(deploymentInfo, null, 2) + '\n');
+await Bun.write(
+  "deployment.json",
+  JSON.stringify(deploymentInfo, null, 2) + "\n",
+);
 console.log("\n✅ Wrote deployment info to deployment.json");
 
 const contractEnvLines = allContracts
-  .map((c) => `VITE_${c.envKey}_CONTRACT_ID=${deploymentContracts[c.packageName] || ""}`)
+  .map(
+    (c) =>
+      `VITE_${c.envKey}_CONTRACT_ID=${deploymentContracts[c.packageName] || ""}`,
+  )
   .join("\n");
 
 const envContent = `# Auto-generated by deploy script
@@ -400,7 +469,7 @@ VITE_DEV_PLAYER1_SECRET=${walletSecrets.player1}
 VITE_DEV_PLAYER2_SECRET=${walletSecrets.player2}
 `;
 
-await Bun.write('.env', envContent + '\n');
+await Bun.write(".env", envContent + "\n");
 console.log("✅ Wrote secrets to .env (gitignored)");
 
 // Write backend/.env for tradex-hub Soroban client
@@ -415,7 +484,7 @@ STELLAR_NETWORK_PASSPHRASE=${NETWORK_PASSPHRASE}
 STELLAR_RPC_URL=${RPC_URL}
 TRADEX_HUB_CONTRACT_ID=${tradexHubId}
 `;
-  await Bun.write('backend/.env', backendEnvContent + '\n');
+  await Bun.write("backend/.env", backendEnvContent + "\n");
   console.log("✅ Wrote backend/.env for tradex-hub Soroban client");
 }
 

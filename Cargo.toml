@@ -6,8 +6,7 @@ members = [
   "contracts/twenty-one",
   "contracts/number-guess",
   "contracts/dice-duel",
-  "contracts/tradex-hub",
-  "contracts/tradex-hubs",
+  "contracts/tradex-hub"
 ]
 
 [workspace.dependencies]

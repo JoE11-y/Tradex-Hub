@@ -36,12 +36,7 @@ pub struct TradexHub;
 
 #[contractimpl]
 impl TradexHub {
-    pub fn __constructor(
-        env: Env,
-        admin: Address,
-        attestor_pubkey: BytesN<32>,
-        game_hub: Address,
-    ) {
+    pub fn __constructor(env: Env, admin: Address, attestor_pubkey: BytesN<32>, game_hub: Address) {
         env.storage()
             .instance()
             .set(&storage::DataKey::Admin, &admin);
@@ -61,12 +56,17 @@ impl TradexHub {
 
     // -- Player management --
 
-    pub fn register_player(env: Env, player: Address) -> PlayerStats {
-        player.require_auth();
+    pub fn register_player(
+        env: Env,
+        admin: Address,
+        player: Address,
+    ) -> Result<PlayerStats, Error> {
+        storage::require_admin(&env, &admin)?;
+
         storage::bump_instance(&env);
 
         if let Some(stats) = storage::get_player(&env, &player) {
-            return stats;
+            return Ok(stats);
         }
 
         let stats = PlayerStats {
@@ -93,7 +93,7 @@ impl TradexHub {
 
         storage::set_player_session(&env, &player, session_id);
 
-        stats
+        Ok(stats)
     }
 
     // -- Close account (ends GameHub session) --
@@ -102,8 +102,8 @@ impl TradexHub {
         player.require_auth();
         storage::bump_instance(&env);
 
-        let session_id = storage::get_player_session(&env, &player)
-            .ok_or(Error::PlayerNotRegistered)?;
+        let session_id =
+            storage::get_player_session(&env, &player).ok_or(Error::PlayerNotRegistered)?;
 
         let game_hub_addr = storage::get_game_hub(&env);
         let game_hub = GameHubClient::new(&env, &game_hub_addr);
@@ -132,8 +132,7 @@ impl TradexHub {
         storage::bump_instance(&env);
 
         // Check if player already has this badge type
-        if let Some(existing_token_id) =
-            storage::get_badge_token_by_type(&env, &player, badge_type)
+        if let Some(existing_token_id) = storage::get_badge_token_by_type(&env, &player, badge_type)
         {
             return Ok(existing_token_id);
         }

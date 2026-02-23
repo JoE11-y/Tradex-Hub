@@ -1903,13 +1903,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tradex-hubs"
-version = "0.1.0"
-dependencies = [
- "soroban-sdk",
-]
-
-[[package]]
 name = "twenty-one"
 version = "0.1.0"
 dependencies = [
