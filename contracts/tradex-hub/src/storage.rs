@@ -8,7 +8,11 @@ pub enum DataKey {
     Admin,
     BadgeVk,
     Attestor,
+    GameHub,
+    SessionCounter,
     Player(Address),
+    /// Maps player → GameHub session_id for close_account
+    PlayerSession(Address),
     BadgeMeta(u32),
     /// Maps (player, badge_type) → token_id for duplicate prevention
     BadgeByType(Address, u32),
@@ -116,6 +120,36 @@ pub fn get_badge_token_by_type(env: &Env, player: &Address, badge_type: u32) -> 
 pub fn set_badge_token_by_type(env: &Env, player: &Address, badge_type: u32, token_id: u32) {
     let key = DataKey::BadgeByType(player.clone(), badge_type);
     env.storage().persistent().set(&key, &token_id);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);
+}
+
+// -- GameHub helpers --
+
+pub fn get_game_hub(env: &Env) -> Address {
+    env.storage().instance().get(&DataKey::GameHub).unwrap()
+}
+
+pub fn set_game_hub(env: &Env, addr: &Address) {
+    env.storage().instance().set(&DataKey::GameHub, addr);
+}
+
+pub fn next_session_id(env: &Env) -> u32 {
+    let counter: u32 = env.storage().instance().get(&DataKey::SessionCounter).unwrap_or(0);
+    let next = counter + 1;
+    env.storage().instance().set(&DataKey::SessionCounter, &next);
+    next
+}
+
+pub fn get_player_session(env: &Env, player: &Address) -> Option<u32> {
+    let key = DataKey::PlayerSession(player.clone());
+    env.storage().persistent().get(&key)
+}
+
+pub fn set_player_session(env: &Env, player: &Address, session_id: u32) {
+    let key = DataKey::PlayerSession(player.clone());
+    env.storage().persistent().set(&key, &session_id);
     env.storage()
         .persistent()
         .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);

@@ -6,11 +6,30 @@ mod storage;
 mod types;
 mod verification;
 
-use soroban_sdk::{contract, contractimpl, Address, Bytes, BytesN, Env, String};
+use soroban_sdk::{contract, contractclient, contractimpl, Address, Bytes, BytesN, Env, String};
 use stellar_tokens::non_fungible::{burnable::NonFungibleBurnable, Base, NonFungibleToken};
 
 use errors::Error;
 use types::{BadgeRecord, PlayerStats};
+
+// GameHub contract interface (CB4VZAT2U3UC6XFK3N23SKRF2NDCMP3QHJYMCHHFMZO7MRQO6DQ2EMYG)
+#[contractclient(name = "GameHubClient")]
+pub trait GameHub {
+    fn start_game(
+        env: Env,
+        game_id: Address,
+        session_id: u32,
+        player1: Address,
+        player2: Address,
+        player1_points: i128,
+        player2_points: i128,
+    );
+
+    fn end_game(env: Env, session_id: u32, player1_won: bool);
+}
+
+/// Minimum badges to "win" when closing account
+const WIN_BADGE_THRESHOLD: u32 = 5;
 
 #[contract]
 pub struct TradexHub;
@@ -21,11 +40,13 @@ impl TradexHub {
         env: Env,
         admin: Address,
         attestor_pubkey: BytesN<32>,
+        game_hub: Address,
     ) {
         env.storage()
             .instance()
             .set(&storage::DataKey::Admin, &admin);
         storage::set_attestor(&env, &attestor_pubkey);
+        storage::set_game_hub(&env, &game_hub);
 
         // Initialize NFT collection metadata
         Base::set_metadata(
@@ -55,7 +76,45 @@ impl TradexHub {
             registered_at: env.ledger().timestamp(),
         };
         storage::set_player(&env, &player, &stats);
+
+        // Register with GameHub: start a session with 0 points
+        let game_hub_addr = storage::get_game_hub(&env);
+        let game_hub = GameHubClient::new(&env, &game_hub_addr);
+        let session_id = storage::next_session_id(&env);
+
+        game_hub.start_game(
+            &env.current_contract_address(), // game_id = this contract
+            &session_id,
+            &player,                         // player1 = the player
+            &env.current_contract_address(), // player2 = this contract (placeholder)
+            &0i128,                          // player1_points = 0
+            &0i128,                          // player2_points = 0
+        );
+
+        storage::set_player_session(&env, &player, session_id);
+
         stats
+    }
+
+    // -- Close account (ends GameHub session) --
+
+    pub fn close_account(env: Env, player: Address) -> Result<bool, Error> {
+        player.require_auth();
+        storage::bump_instance(&env);
+
+        let session_id = storage::get_player_session(&env, &player)
+            .ok_or(Error::PlayerNotRegistered)?;
+
+        let game_hub_addr = storage::get_game_hub(&env);
+        let game_hub = GameHubClient::new(&env, &game_hub_addr);
+
+        // Player "wins" if they earned enough badges
+        let badge_count = Base::balance(&env, &player);
+        let player_won = badge_count >= WIN_BADGE_THRESHOLD;
+
+        game_hub.end_game(&session_id, &player_won);
+
+        Ok(player_won)
     }
 
     // -- Badges (server-minted as NFTs with ZK proof, admin auth) --

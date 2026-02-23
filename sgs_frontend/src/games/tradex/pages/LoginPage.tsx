@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Keypair } from '@stellar/stellar-sdk';
 import { useConnectionStore } from '../store/connectionStore';
+
+const DEV_PLAYER1_ADDRESS = import.meta.env.VITE_DEV_PLAYER1_ADDRESS as string | undefined;
+const DEV_PLAYER2_ADDRESS = import.meta.env.VITE_DEV_PLAYER2_ADDRESS as string | undefined;
 
 export function LoginPage() {
   const walletLogin = useConnectionStore((s) => s.walletLogin);
@@ -15,7 +17,6 @@ export function LoginPage() {
       await walletLogin();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Wallet connection failed';
-      // Don't show error if user just cancelled the modal
       if (!msg.toLowerCase().includes('cancel') && !msg.toLowerCase().includes('closed')) {
         setError(msg);
       }
@@ -24,12 +25,11 @@ export function LoginPage() {
     }
   };
 
-  const handleDevLogin = async () => {
+  const handleDevLogin = async (address: string) => {
     setLoading('dev');
     setError(null);
     try {
-      const addr = Keypair.random().publicKey();
-      await devLogin(addr);
+      await devLogin(address);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Login failed');
     } finally {
@@ -62,13 +62,25 @@ export function LoginPage() {
             {loading === 'wallet' ? 'Connecting Wallet...' : 'Connect Wallet'}
           </button>
 
-          <button
-            onClick={handleDevLogin}
-            disabled={loading !== null}
-            className="w-full py-2.5 px-4 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-300 text-xs font-medium rounded-lg border border-slate-700/50 transition-all disabled:opacity-50"
-          >
-            {loading === 'dev' ? 'Connecting...' : 'Dev Mode (No Wallet)'}
-          </button>
+          {DEV_PLAYER1_ADDRESS && (
+            <button
+              onClick={() => handleDevLogin(DEV_PLAYER1_ADDRESS)}
+              disabled={loading !== null}
+              className="w-full py-2.5 px-4 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-300 text-xs font-medium rounded-lg border border-slate-700/50 transition-all disabled:opacity-50"
+            >
+              {loading === 'dev' ? 'Connecting...' : `Dev Player 1 (${DEV_PLAYER1_ADDRESS.slice(0, 6)}...)`}
+            </button>
+          )}
+
+          {DEV_PLAYER2_ADDRESS && (
+            <button
+              onClick={() => handleDevLogin(DEV_PLAYER2_ADDRESS)}
+              disabled={loading !== null}
+              className="w-full py-2.5 px-4 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-300 text-xs font-medium rounded-lg border border-slate-700/50 transition-all disabled:opacity-50"
+            >
+              {loading === 'dev' ? 'Connecting...' : `Dev Player 2 (${DEV_PLAYER2_ADDRESS.slice(0, 6)}...)`}
+            </button>
+          )}
         </div>
 
         {error && (

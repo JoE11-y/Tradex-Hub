@@ -8,7 +8,11 @@
  */
 
 import { $ } from "bun";
-import { getWorkspaceContracts, listContractNames, selectContracts } from "./utils/contracts";
+import {
+  getWorkspaceContracts,
+  listContractNames,
+  selectContracts,
+} from "./utils/contracts";
 
 function usage() {
   console.log(`
@@ -25,10 +29,13 @@ console.log("🔨 Building Soroban contracts...\n");
 
 // Check if stellar CLI is available
 try {
+  // await $`which stella`
   await $`stellar --version`.quiet();
 } catch (error) {
   console.error("❌ Error: stellar CLI not found");
-  console.error("Please install it: https://developers.stellar.org/docs/tools/developer-tools");
+  console.error(
+    "Please install it: https://developers.stellar.org/docs/tools/developer-tools",
+  );
   process.exit(1);
 }
 

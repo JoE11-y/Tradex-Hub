@@ -151,35 +151,24 @@ OpenZeppelin manages additional NFT storage internally:
 
 OZ also defines NFT errors (codes 200+): `NonExistentToken`, `IncorrectOwner`, `InsufficientApproval`, etc.
 
-## Build
+## Build & Deploy
+
+Uses the unified studio scripts:
 
 ```bash
 cd Tradex-App
 
-# Build WASM
-cargo build --release --target wasm32v1-none -p tradex-hub
+# Build
+bun run build tradex-hub
 
-# Output: target/wasm32v1-none/release/tradex_hub.wasm
+# Deploy (generates attestor keypair, passes game_hub, sets badge VK, writes backend/.env)
+bun run deploy tradex-hub
+
+# Or build + deploy everything at once
+bun run setup
 ```
 
-## Deploy
-
-```bash
-# Full deploy script (builds, installs WASM, deploys with constructor, sets badge VK)
-ADMIN_SECRET=S... ./scripts/deploy-tradex-hub.sh
-
-# Or manually:
-stellar contract install --wasm target/wasm32v1-none/release/tradex_hub.wasm \
-  --source-account $ADMIN_SECRET --network testnet
-
-stellar contract deploy --wasm-hash $WASM_HASH \
-  --source-account $ADMIN_SECRET --network testnet \
-  -- --admin $ADMIN_ADDRESS --attestor_pubkey $ATTESTOR_PUBKEY_HEX
-
-stellar contract invoke --id $CONTRACT_ID \
-  --source-account $ADMIN_SECRET --network testnet \
-  -- set_badge_vk --vk_bytes $BADGE_VK_HEX
-```
+The deploy script handles tradex-hub's custom constructor (`--admin`, `--attestor_pubkey`, `--game_hub`) and automatically sets the badge VK if the circuit is built.
 
 ## Dependencies
 

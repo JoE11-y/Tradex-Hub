@@ -175,7 +175,9 @@ Tradex-App/
 │
 └── scripts/
     ├── build-badge-circuit.sh   # Compile circuit + generate VK + optional test proof
-    └── deploy-tradex-hub.sh     # Build + deploy contract to Stellar testnet
+    ├── build.ts                 # Build all Soroban contracts
+    ├── deploy.ts                # Deploy contracts to testnet (handles tradex-hub custom args)
+    └── setup.ts                 # One-command: build + deploy + bindings + config
 ```
 
 ## Quick Start
@@ -210,10 +212,14 @@ cd sgs_frontend && bun run dev
 ./scripts/build-badge-circuit.sh --prove  # also generate + verify test proof
 ```
 
-### Deploy Contract
+### Deploy Contracts
 
 ```bash
-ADMIN_SECRET=S... ./scripts/deploy-tradex-hub.sh
+# Deploy everything (including tradex-hub with attestor + game_hub + badge VK)
+bun run setup
+
+# Or deploy just tradex-hub
+bun run deploy tradex-hub
 ```
 
 ## API Surface

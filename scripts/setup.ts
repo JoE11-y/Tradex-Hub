@@ -31,7 +31,9 @@ if (!existsSync("node_modules/@stellar/stellar-sdk")) {
   try {
     await $`bun install`;
   } catch (error) {
-    console.error("\n❌ Dependency installation failed. Please check the errors above.");
+    console.error(
+      "\n❌ Dependency installation failed. Please check the errors above.",
+    );
     process.exit(1);
   }
 }
@@ -58,27 +60,6 @@ try {
   process.exit(1);
 }
 
-// Step 2.5: Deploy tradex-hub (optional — requires badge circuit to be built)
-{
-  const badgeVkExists = existsSync('circuits/badge_proof/target/vk');
-  if (badgeVkExists) {
-    console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("Step 2.5: Deploying tradex-hub contract");
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-    try {
-      await $`bun run scripts/deploy-tradex-hub.ts`;
-      console.log("✅ tradex-hub deployed successfully");
-    } catch (error) {
-      console.warn("⚠️  tradex-hub deployment failed (non-fatal). You can deploy it manually later:");
-      console.warn("   bun run scripts/deploy-tradex-hub.ts");
-    }
-  } else {
-    console.log("\nℹ️  Skipping tradex-hub deploy (badge circuit not built).");
-    console.log("   To deploy tradex-hub: build the badge circuit first, then run:");
-    console.log("   bun run scripts/deploy-tradex-hub.ts\n");
-  }
-}
-
 // Step 3: Generate bindings
 console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 console.log("Step 3/4: Generating TypeScript bindings");
@@ -86,7 +67,9 @@ console.log("━━━━━━━━━━━━━━━━━━━━━━�
 try {
   await $`bun run bindings`;
 } catch (error) {
-  console.error("\n❌ Bindings generation failed. Please check the errors above.");
+  console.error(
+    "\n❌ Bindings generation failed. Please check the errors above.",
+  );
   process.exit(1);
 }
 
@@ -95,48 +78,66 @@ console.log("\n━━━━━━━━━━━━━━━━━━━━━�
 console.log("Step 4/4: Writing local configuration");
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
-let rpcUrl = 'https://soroban-testnet.stellar.org';
-let networkPassphrase = 'Test SDF Network ; September 2015';
-let wallets: { admin: string; player1: string; player2: string } = { admin: '', player1: '', player2: '' };
+let rpcUrl = "https://soroban-testnet.stellar.org";
+let networkPassphrase = "Test SDF Network ; September 2015";
+let wallets: { admin: string; player1: string; player2: string } = {
+  admin: "",
+  player1: "",
+  player2: "",
+};
 const contracts = await getWorkspaceContracts();
 const contractIds: Record<string, string> = {};
 
-if (existsSync('deployment.json')) {
+if (existsSync("deployment.json")) {
   const deploymentInfo = await Bun.file("deployment.json").json();
-  if (deploymentInfo?.contracts && typeof deploymentInfo.contracts === 'object') {
+  if (
+    deploymentInfo?.contracts &&
+    typeof deploymentInfo.contracts === "object"
+  ) {
     Object.assign(contractIds, deploymentInfo.contracts);
   } else {
     // Backwards compatible fallback
-    if (deploymentInfo?.mockGameHubId) contractIds["mock-game-hub"] = deploymentInfo.mockGameHubId;
-    if (deploymentInfo?.twentyOneId) contractIds["twenty-one"] = deploymentInfo.twentyOneId;
-    if (deploymentInfo?.numberGuessId) contractIds["number-guess"] = deploymentInfo.numberGuessId;
+    if (deploymentInfo?.mockGameHubId)
+      contractIds["mock-game-hub"] = deploymentInfo.mockGameHubId;
+    if (deploymentInfo?.twentyOneId)
+      contractIds["twenty-one"] = deploymentInfo.twentyOneId;
+    if (deploymentInfo?.numberGuessId)
+      contractIds["number-guess"] = deploymentInfo.numberGuessId;
   }
   rpcUrl = deploymentInfo?.rpcUrl || rpcUrl;
   networkPassphrase = deploymentInfo?.networkPassphrase || networkPassphrase;
   wallets = deploymentInfo?.wallets || wallets;
 } else {
-  const env = await readEnvFile('.env');
+  const env = await readEnvFile(".env");
   for (const contract of contracts) {
-    contractIds[contract.packageName] = getEnvValue(env, `VITE_${contract.envKey}_CONTRACT_ID`);
+    contractIds[contract.packageName] = getEnvValue(
+      env,
+      `VITE_${contract.envKey}_CONTRACT_ID`,
+    );
   }
-  rpcUrl = getEnvValue(env, 'VITE_SOROBAN_RPC_URL', rpcUrl);
-  networkPassphrase = getEnvValue(env, 'VITE_NETWORK_PASSPHRASE', networkPassphrase);
+  rpcUrl = getEnvValue(env, "VITE_SOROBAN_RPC_URL", rpcUrl);
+  networkPassphrase = getEnvValue(
+    env,
+    "VITE_NETWORK_PASSPHRASE",
+    networkPassphrase,
+  );
   wallets = {
-    admin: getEnvValue(env, 'VITE_DEV_ADMIN_ADDRESS'),
-    player1: getEnvValue(env, 'VITE_DEV_PLAYER1_ADDRESS'),
-    player2: getEnvValue(env, 'VITE_DEV_PLAYER2_ADDRESS'),
+    admin: getEnvValue(env, "VITE_DEV_ADMIN_ADDRESS"),
+    player1: getEnvValue(env, "VITE_DEV_PLAYER1_ADDRESS"),
+    player2: getEnvValue(env, "VITE_DEV_PLAYER2_ADDRESS"),
   };
 }
 
-const existingEnv = await readEnvFile('.env');
+const existingEnv = await readEnvFile(".env");
 const walletSecrets = {
-  player1: getEnvValue(existingEnv, 'VITE_DEV_PLAYER1_SECRET', 'NOT_AVAILABLE'),
-  player2: getEnvValue(existingEnv, 'VITE_DEV_PLAYER2_SECRET', 'NOT_AVAILABLE'),
+  player1: getEnvValue(existingEnv, "VITE_DEV_PLAYER1_SECRET", "NOT_AVAILABLE"),
+  player2: getEnvValue(existingEnv, "VITE_DEV_PLAYER2_SECRET", "NOT_AVAILABLE"),
 };
 
 const missingIds: string[] = [];
 for (const contract of contracts) {
-  if (!contractIds[contract.packageName]) missingIds.push(`VITE_${contract.envKey}_CONTRACT_ID`);
+  if (!contractIds[contract.packageName])
+    missingIds.push(`VITE_${contract.envKey}_CONTRACT_ID`);
 }
 if (missingIds.length > 0) {
   console.error("❌ Error: Missing contract IDs (run `bun run deploy` first):");
@@ -144,25 +145,11 @@ if (missingIds.length > 0) {
   process.exit(1);
 }
 
-// Also read tradex-hub contract ID from backend/.env if available
-let tradexHubContractId = '';
-if (existsSync('backend/.env')) {
-  const backendEnv = await readEnvFile('backend/.env');
-  tradexHubContractId = getEnvValue(backendEnv, 'TRADEX_HUB_CONTRACT_ID');
-}
-// Also check deployment.json for tradex-hub
-if (!tradexHubContractId && existsSync('deployment.json')) {
-  try {
-    const dj = await Bun.file("deployment.json").json();
-    if (dj?.contracts?.['tradex-hub']) tradexHubContractId = dj.contracts['tradex-hub'];
-  } catch {}
-}
-
 const contractEnvLines = contracts
-  .map((c) => `VITE_${c.envKey}_CONTRACT_ID=${contractIds[c.packageName] || ""}`)
+  .map(
+    (c) => `VITE_${c.envKey}_CONTRACT_ID=${contractIds[c.packageName] || ""}`,
+  )
   .join("\n");
-
-const tradexHubEnvLine = tradexHubContractId ? `\nVITE_TRADEX_HUB_CONTRACT_ID=${tradexHubContractId}` : '';
 
 const envContent = `# Auto-generated by setup script
 # Do not edit manually - run 'bun run setup' to regenerate
@@ -170,7 +157,7 @@ const envContent = `# Auto-generated by setup script
 
 VITE_SOROBAN_RPC_URL=${rpcUrl}
 VITE_NETWORK_PASSPHRASE=${networkPassphrase}
-${contractEnvLines}${tradexHubEnvLine}
+${contractEnvLines}
 
 # Dev wallet addresses for testing
 VITE_DEV_ADMIN_ADDRESS=${wallets.admin}
@@ -188,10 +175,9 @@ console.log("✅ Root .env file created\n");
 console.log("🎉 Setup complete!\n");
 console.log("Contract IDs:");
 for (const contract of contracts) {
-  console.log(`  ${contract.packageName}: ${contractIds[contract.packageName]}`);
-}
-if (tradexHubContractId) {
-  console.log(`  tradex-hub: ${tradexHubContractId}`);
+  console.log(
+    `  ${contract.packageName}: ${contractIds[contract.packageName]}`,
+  );
 }
 console.log("");
 console.log("Next steps:");
