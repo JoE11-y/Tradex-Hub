@@ -70,54 +70,60 @@ export function PatternPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800/50 shrink-0">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigateTo('lobby')}
-            className="text-xs text-slate-200 hover:text-white transition-colors"
-          >
-            &larr; Back
-          </button>
-          <h2 className="text-sm font-semibold text-white">Pattern Recognition</h2>
-          {challenge && (
-            <span className={`text-[10px] px-2 py-0.5 rounded ${challenge.difficulty === 'easy' ? 'bg-green-500/20 text-green-400' :
-              challenge.difficulty === 'medium' ? 'bg-cyan-500/20 text-cyan-400' :
-                'bg-red-500/20 text-red-400'
-              }`}>
-              {challenge.difficulty.toUpperCase()}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Timer */}
-          {challenge && !result && (
-            <span className="text-xs text-slate-200 font-mono">{elapsed}s</span>
-          )}
-
-          {/* Stats */}
-          {stats && (
-            <div className="flex items-center gap-2 text-[10px] ">
-              <span>{stats.accuracy}% acc</span>
-              <span>{stats.total} done</span>
-            </div>
-          )}
-
-          {/* Streak */}
-          {stats && stats.current_streak > 0 && (
-            <StreakIndicator
-              streak={stats.current_streak}
-              multiplier={stats.current_streak >= 10 ? 2 : stats.current_streak >= 6 ? 1.5 : stats.current_streak >= 3 ? 1.25 : 1}
-            />
-          )}
+      <div className="border-b border-slate-800/50 shrink-0">
+        {/* Top row: back, title, close */}
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <button
+              onClick={() => navigateTo('lobby')}
+              className="text-xs text-slate-200 hover:text-white transition-colors shrink-0"
+            >
+              &larr; Back
+            </button>
+            <h2 className="text-sm font-semibold text-white truncate">Pattern Recognition</h2>
+            {challenge && (
+              <span className={`text-[10px] px-2 py-0.5 rounded shrink-0 ${challenge.difficulty === 'easy' ? 'bg-green-500/20 text-green-400' :
+                challenge.difficulty === 'medium' ? 'bg-cyan-500/20 text-cyan-400' :
+                  'bg-red-500/20 text-red-400'
+                }`}>
+                {challenge.difficulty.toUpperCase()}
+              </span>
+            )}
+          </div>
 
           <button
             onClick={handleEndSession}
-            className="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-900/30 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/50 rounded-lg transition-all"
+            className="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-900/30 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/50 rounded-lg transition-all shrink-0 ml-2"
           >
             Close
           </button>
         </div>
+
+        {/* Bottom row: timer, stats, streak */}
+        {(stats || (challenge && !result)) && (
+          <div className="flex items-center gap-3 px-3 sm:px-4 pb-2">
+            {/* Timer */}
+            {challenge && !result && (
+              <span className="text-xs text-slate-200 font-mono">{elapsed}s</span>
+            )}
+
+            {/* Stats */}
+            {stats && (
+              <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                <span>{stats.accuracy}% acc</span>
+                <span>{stats.total} done</span>
+              </div>
+            )}
+
+            {/* Streak */}
+            {stats && stats.current_streak > 0 && (
+              <StreakIndicator
+                streak={stats.current_streak}
+                multiplier={stats.current_streak >= 10 ? 2 : stats.current_streak >= 6 ? 1.5 : stats.current_streak >= 3 ? 1.25 : 1}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Chart */}

@@ -1,7 +1,7 @@
 export const CONFIG = {
   PORT: parseInt(process.env.PORT || "3001", 10),
   DB_PATH: process.env.DB_PATH || "./tradex.db",
-  BINANCE_BASE: "https://api.binance.com/api/v3",
+  BINANCE_BASE: process.env.BINANCE_BASE || "https://data-api.binance.vision/api/v3",
   PRICE_POLL_INTERVAL_MS: 2000,
   CANDLE_CACHE_TTL_MS: 5_000,
   LEADERBOARD_REBUILD_INTERVAL_MS: 30_000,
