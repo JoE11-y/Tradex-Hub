@@ -62,6 +62,7 @@ const MODULE_CARDS = [
 
 export function LobbyPage() {
   const startSession = useTradingStore((s) => s.startSession);
+  const loadSession = useTradingStore((s) => s.loadSession);
   const loadLeaderboard = useTradingStore((s) => s.loadLeaderboard);
   const leaderboardEntries = useTradingStore((s) => s.leaderboardEntries);
   const navigateTo = useGameStore((s) => s.navigateTo);
@@ -73,9 +74,14 @@ export function LobbyPage() {
     loadLeaderboard('all_time');
   }, [loadLeaderboard]);
 
-  const handleModuleClick = (page: string, isTrading?: boolean) => {
+  const handleModuleClick = async (page: string, isTrading?: boolean) => {
     if (isTrading) {
-      startSession().catch(console.error);
+      try {
+        await startSession();
+      } catch {
+        // Session already exists — resume it
+        await loadSession();
+      }
     } else {
       navigateTo(page as 'patterns' | 'predictions');
     }

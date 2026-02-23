@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import {
   patternApi,
   predictionApi,
+  playerApi,
 } from '../services/api';
 import type {
   CandleData,
@@ -12,6 +13,7 @@ import type {
   PredictionAnswerResult,
   PredictionStatsData,
 } from '../services/api';
+import { useGameStore } from './gameStore';
 
 interface EducationState {
   // Pattern module
@@ -88,6 +90,11 @@ export const useEducationStore = create<EducationState>()((set, get) => ({
         timeMs,
       );
       set({ patternResult: result, patternLoading: false });
+      // Refresh stats and XP immediately
+      get().loadPatternStats();
+      playerApi.getProfile().then((profile) => {
+        useGameStore.getState().syncFromProfile(profile);
+      }).catch(() => {});
       return result;
     } catch (err) {
       console.error('[educationStore] Failed to submit pattern answer:', err);
@@ -137,6 +144,11 @@ export const useEducationStore = create<EducationState>()((set, get) => ({
         revealedCandles: result.hidden_candles,
         predictionLoading: false,
       });
+      // Refresh stats and XP immediately
+      get().loadPredictionStats();
+      playerApi.getProfile().then((profile) => {
+        useGameStore.getState().syncFromProfile(profile);
+      }).catch(() => {});
       return result;
     } catch (err) {
       console.error('[educationStore] Failed to submit prediction answer:', err);

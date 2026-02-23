@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Keypair } from '@stellar/stellar-sdk';
 import { useConnectionStore } from '../store/connectionStore';
 
 export function LoginPage() {
@@ -27,9 +28,7 @@ export function LoginPage() {
     setLoading('dev');
     setError(null);
     try {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-      let addr = 'G';
-      for (let i = 0; i < 55; i++) addr += chars[Math.floor(Math.random() * chars.length)];
+      const addr = Keypair.random().publicKey();
       await devLogin(addr);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Login failed');

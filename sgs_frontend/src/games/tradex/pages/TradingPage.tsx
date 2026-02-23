@@ -24,12 +24,11 @@ export function TradingPage() {
   const startTimeRef = useRef(Date.now());
   const [elapsed, setElapsed] = useState(0);
 
-  // Ensure candles are loaded when trading page opens
+  // Clear stale candles and fetch fresh data on mount
   useEffect(() => {
-    if (candles.length === 0) {
-      loadCandles();
-    }
-  }, [candles.length, loadCandles]);
+    useTradingStore.setState({ candles: [] });
+    loadCandles();
+  }, [loadCandles]);
 
   // Session timer
   useEffect(() => {

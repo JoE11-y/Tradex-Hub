@@ -96,11 +96,9 @@ fi
 WASM_PATH="$CONTRACT_DIR/target/wasm32v1-none/release/tradex_hub.wasm"
 
 if [ "${SKIP_BUILD:-}" != "1" ]; then
-  if [ ! -f "$WASM_PATH" ]; then
-    echo ""
-    echo "==> Building tradex-hub contract..."
-    (cd "$CONTRACT_DIR" && cargo build --release --target wasm32v1-none)
-  fi
+  echo ""
+  echo "==> Building tradex-hub contract (clean)..."
+  (cd "$PROJECT_DIR" && cargo build --release --target wasm32v1-none -p tradex-hub)
 else
   echo ""
   echo "==> Skipping build (SKIP_BUILD=1)"
@@ -179,30 +177,83 @@ echo "==> Attestor public key: $ATTESTOR_PUBKEY_HEX"
 
 echo ""
 echo "==> Installing WASM on $NETWORK..."
-WASM_HASH=$(stellar contract install \
+INSTALL_OUTPUT=$(stellar contract upload \
   --wasm "$WASM_PATH" \
   --source-account "$SOURCE_ACCOUNT" \
-  --network "$NETWORK" 2>&1 | tail -1)
+  --network "$NETWORK" \
+  --inclusion-fee 10000000 2>&1)
+WASM_HASH=$(echo "$INSTALL_OUTPUT" | tail -1)
+echo "$INSTALL_OUTPUT"
 echo "  WASM hash: $WASM_HASH"
 
 echo "==> Deploying tradex-hub with constructor args..."
-CONTRACT_ID=$(stellar contract deploy \
+echo ""
+echo "────────────────────────────────────────"
+echo "  Run this command manually if it hangs:"
+echo "────────────────────────────────────────"
+echo "stellar contract deploy \\"
+echo "  --wasm-hash $WASM_HASH \\"
+echo "  --source-account $SOURCE_ACCOUNT \\"
+echo "  --network $NETWORK \\"
+echo "  --inclusion-fee 10000000 \\"
+echo "  -- \\"
+echo "  --admin $ADMIN_ADDRESS \\"
+echo "  --attestor_pubkey $ATTESTOR_PUBKEY_HEX"
+echo "────────────────────────────────────────"
+echo ""
+
+DEPLOY_OUTPUT=$(stellar contract deploy \
   --wasm-hash "$WASM_HASH" \
   --source-account "$SOURCE_ACCOUNT" \
   --network "$NETWORK" \
+  --inclusion-fee 10000000 \
   -- \
   --admin "$ADMIN_ADDRESS" \
-  --attestor_pubkey "$ATTESTOR_PUBKEY_HEX" 2>&1 | tail -1)
+  --attestor_pubkey "$ATTESTOR_PUBKEY_HEX" 2>&1)
+DEPLOY_EXIT=$?
+echo "$DEPLOY_OUTPUT"
+if [ $DEPLOY_EXIT -ne 0 ]; then
+  echo "ERROR: Deploy failed (exit $DEPLOY_EXIT)"
+  echo ""
+  echo "If the deploy timed out, you can set CONTRACT_ID manually and run set_badge_vk:"
+  echo ""
+  echo "stellar contract invoke \\"
+  echo "  --id <CONTRACT_ID> \\"
+  echo "  --source-account $SOURCE_ACCOUNT \\"
+  echo "  --network $NETWORK \\"
+  echo "  --inclusion-fee 10000000 \\"
+  echo "  -- \\"
+  echo "  set_badge_vk \\"
+  echo "  --vk_bytes $BADGE_VK_HEX"
+  exit 1
+fi
+CONTRACT_ID=$(echo "$DEPLOY_OUTPUT" | tail -1)
 
 echo "==> tradex-hub deployed: $CONTRACT_ID"
 
 # ── Step 5: Set badge VK ──
 
 echo "==> Setting badge VK..."
+echo ""
+echo "────────────────────────────────────────"
+echo "  Run this command manually if it hangs:"
+echo "────────────────────────────────────────"
+echo "stellar contract invoke \\"
+echo "  --id $CONTRACT_ID \\"
+echo "  --source-account $SOURCE_ACCOUNT \\"
+echo "  --network $NETWORK \\"
+echo "  --inclusion-fee 10000000 \\"
+echo "  -- \\"
+echo "  set_badge_vk \\"
+echo "  --vk_bytes $BADGE_VK_HEX"
+echo "────────────────────────────────────────"
+echo ""
+
 stellar contract invoke \
   --id "$CONTRACT_ID" \
   --source-account "$SOURCE_ACCOUNT" \
   --network "$NETWORK" \
+  --inclusion-fee 10000000 \
   -- \
   set_badge_vk \
   --vk_bytes "$BADGE_VK_HEX"

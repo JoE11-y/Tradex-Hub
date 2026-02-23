@@ -3,6 +3,7 @@ import { CandleChart } from '../components/CandleChart';
 import { StreakIndicator } from '../components/StreakIndicator';
 import { useEducationStore } from '../store/educationStore';
 import { useGameStore } from '../store/gameStore';
+import { playerApi } from '../services/api';
 import type { CandleData } from '../services/api';
 
 const ASSETS = ['BTC', 'ETH', 'XLM'] as const;
@@ -17,7 +18,9 @@ export function PredictionPage() {
   const loadChallenge = useEducationStore((s) => s.loadPredictionChallenge);
   const submitAnswer = useEducationStore((s) => s.submitPredictionAnswer);
   const loadStats = useEducationStore((s) => s.loadPredictionStats);
+  const resetPrediction = useEducationStore((s) => s.resetPrediction);
   const navigateTo = useGameStore((s) => s.navigateTo);
+  const syncFromProfile = useGameStore((s) => s.syncFromProfile);
 
   const [selectedAsset, setSelectedAsset] = useState<string>('BTC');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1h');
@@ -67,6 +70,13 @@ export function PredictionPage() {
   const handleNext = () => {
     setShowRevealed(false);
     loadChallenge(selectedAsset, selectedTimeframe);
+  };
+
+  const handleEndSession = () => {
+    resetPrediction();
+    // Sync latest XP from server before navigating back
+    playerApi.getProfile().then(syncFromProfile).catch(() => {});
+    navigateTo('lobby');
   };
 
   return (
@@ -131,6 +141,13 @@ export function PredictionPage() {
               multiplier={stats.current_streak >= 10 ? 2 : stats.current_streak >= 6 ? 1.5 : stats.current_streak >= 3 ? 1.25 : 1}
             />
           )}
+
+          <button
+            onClick={handleEndSession}
+            className="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-900/30 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/50 rounded-lg transition-all"
+          >
+            Close
+          </button>
         </div>
       </div>
 
@@ -205,9 +222,9 @@ export function PredictionPage() {
                 <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-indigo-300 text-xs font-bold animate-float-up pointer-events-none">+{result.xp_awarded}</span>
               </div>
             )}
-            {result.balance_change !== 0 && (
-              <p className={`text-xs font-medium mb-1 ${result.balance_change > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {result.balance_change > 0 ? '+' : ''}${result.balance_change.toFixed(0)} balance
+            {(result.balance_change ?? 0) !== 0 && (
+              <p className={`text-xs font-medium mb-1 ${(result.balance_change ?? 0) > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {(result.balance_change ?? 0) > 0 ? '+' : ''}${(result.balance_change ?? 0).toFixed(0)} balance
               </p>
             )}
             <p className="text-xs  mb-3 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>Credibility: {result.credibility_score}%</p>

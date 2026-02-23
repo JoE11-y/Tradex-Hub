@@ -236,6 +236,15 @@ export interface PlayerProfile {
   total_trades: number;
   total_pnl: number;
   best_pnl_pct: number;
+  // Education stats
+  pattern_correct: number;
+  pattern_total: number;
+  pattern_streak: number;
+  pattern_best_streak: number;
+  prediction_correct: number;
+  prediction_total: number;
+  prediction_streak: number;
+  credibility_score: number;
 }
 
 export interface SessionData {

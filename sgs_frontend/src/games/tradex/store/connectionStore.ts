@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { StellarWalletsKit } from '@creit-tech/stellar-wallets-kit/sdk';
-import { authApi, setToken, clearToken } from '../services/api';
+import { authApi, playerApi, setToken, clearToken } from '../services/api';
 import { connectWs, disconnectWs } from '../services/wsClient';
 import type { PlayerProfile } from '../services/api';
 
@@ -16,6 +16,7 @@ interface ConnectionState {
   // Actions
   walletLogin: () => Promise<void>;
   devLogin: (walletAddress: string) => Promise<void>;
+  refreshPlayer: () => Promise<void>;
   logout: () => void;
   setWsConnected: (connected: boolean) => void;
 }
@@ -51,6 +52,15 @@ export const useConnectionStore = create<ConnectionState>()((set, get) => ({
     setToken(token);
     set({ isAuthenticated: true, token, player });
     connectWs(token);
+  },
+
+  refreshPlayer: async () => {
+    try {
+      const profile = await playerApi.getProfile();
+      set({ player: profile });
+    } catch {
+      // Non-critical: keep stale data if refresh fails
+    }
   },
 
   logout: () => {

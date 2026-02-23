@@ -119,7 +119,7 @@ export function TradingChart() {
     return result;
   }
 
-  // Update candle data -- use incremental update when only the last candle changed
+  // Update candle data -- incremental update when only the last candle changed
   useEffect(() => {
     if (!candleSeriesRef.current || !volumeSeriesRef.current || candles.length === 0) {
       prevCandleCountRef.current = 0;
@@ -145,7 +145,6 @@ export function TradingChart() {
         value: last.volume,
         color: last.close >= last.open ? '#22c55e40' : '#ef444440',
       });
-      // Update SMA for last point
       if (sma20SeriesRef.current && candles.length >= 20) {
         let sum = 0;
         for (let j = candles.length - 20; j < candles.length; j++) sum += candles[j].close;
@@ -177,6 +176,16 @@ export function TradingChart() {
   }, [candles]);
 
   return (
-    <div ref={chartContainerRef} className="h-full w-full" />
+    <div className="h-full w-full relative">
+      <div ref={chartContainerRef} className="h-full w-full" />
+      {candles.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0f1729]">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-slate-400">Loading chart data...</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
