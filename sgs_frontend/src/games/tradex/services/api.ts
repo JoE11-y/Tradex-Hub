@@ -381,6 +381,7 @@ export interface BadgeData {
   proof_hex: string | null;
   public_inputs_hex: string | null;
   soroban_tx_hash: string | null;
+  nft_token_id: number | null;
   minted_at: number;
 }
 
@@ -405,6 +406,7 @@ export interface BadgePrepareResult {
 export interface BadgeMintResult {
   badge_id: string;
   soroban_tx_hash: string;
+  token_id: number;
   already_minted: boolean;
 }
 

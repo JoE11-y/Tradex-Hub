@@ -242,6 +242,9 @@ export const migrations: string[] = [
   `ALTER TABLE trading_sessions ADD COLUMN daily_high_balance REAL DEFAULT 0`,
   `ALTER TABLE trading_sessions ADD COLUMN drawdown_lockout_until INTEGER DEFAULT 0`,
 
+  // NFT token_id from Soroban badge minting
+  `ALTER TABLE player_badges ADD COLUMN nft_token_id INTEGER`,
+
   // Reset and risk management columns on players
   `ALTER TABLE players ADD COLUMN reset_cooldown_until INTEGER DEFAULT 0`,
   `ALTER TABLE players ADD COLUMN total_resets INTEGER DEFAULT 0`,

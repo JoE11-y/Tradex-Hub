@@ -7,6 +7,7 @@ mod types;
 mod verification;
 
 use soroban_sdk::{contract, contractimpl, Address, Bytes, BytesN, Env, String};
+use stellar_tokens::non_fungible::{burnable::NonFungibleBurnable, Base, NonFungibleToken};
 
 use errors::Error;
 use types::{BadgeRecord, PlayerStats};
@@ -25,6 +26,15 @@ impl TradexHub {
             .instance()
             .set(&storage::DataKey::Admin, &admin);
         storage::set_attestor(&env, &attestor_pubkey);
+
+        // Initialize NFT collection metadata
+        Base::set_metadata(
+            &env,
+            String::from_str(&env, "https://tradex.app/badges/"),
+            String::from_str(&env, "Tradex Badges"),
+            String::from_str(&env, "TXBDG"),
+        );
+
         storage::bump_instance(&env);
     }
 
@@ -48,23 +58,25 @@ impl TradexHub {
         stats
     }
 
-    // -- Badges (server-minted with ZK proof, admin auth) --
+    // -- Badges (server-minted as NFTs with ZK proof, admin auth) --
 
     pub fn mint_badge(
         env: Env,
         admin: Address,
         player: Address,
-        badge_id: String,
         name: String,
         badge_type: u32,
         public_inputs: Bytes,
         proof_bytes: Bytes,
-    ) -> Result<BadgeRecord, Error> {
+    ) -> Result<u32, Error> {
         storage::require_admin(&env, &admin)?;
         storage::bump_instance(&env);
 
-        if let Some(existing) = storage::get_badge(&env, &player, &badge_id) {
-            return Ok(existing);
+        // Check if player already has this badge type
+        if let Some(existing_token_id) =
+            storage::get_badge_token_by_type(&env, &player, badge_type)
+        {
+            return Ok(existing_token_id);
         }
 
         let badge_vk = storage::get_badge_vk(&env)?;
@@ -79,21 +91,23 @@ impl TradexHub {
             return Err(Error::InvalidBadgeType);
         }
 
+        // Mint NFT to player
+        let token_id = Base::sequential_mint(&env, &player);
+
+        // Store badge metadata keyed by token_id
         let record = BadgeRecord {
-            badge_id: badge_id.clone(),
             name,
             badge_type,
             earned_at: env.ledger().timestamp(),
         };
-        storage::set_badge(&env, &player, &badge_id, &record);
-        storage::increment_badge_count(&env, &player);
-        events::emit_badge(&env, &player, &badge_id, badge_type);
+        storage::set_badge_meta(&env, token_id, &record);
+        storage::set_badge_token_by_type(&env, &player, badge_type, token_id);
 
-        Ok(record)
+        Ok(token_id)
     }
 
-    pub fn has_badge(env: Env, player: Address, badge_id: String) -> bool {
-        storage::get_badge(&env, &player, &badge_id).is_some()
+    pub fn has_badge(env: Env, player: Address, badge_type: u32) -> bool {
+        storage::get_badge_token_by_type(&env, &player, badge_type).is_some()
     }
 
     // -- Queries --
@@ -103,7 +117,11 @@ impl TradexHub {
     }
 
     pub fn get_badge_count(env: Env, player: Address) -> u32 {
-        storage::get_badge_count(&env, &player)
+        Base::balance(&env, &player)
+    }
+
+    pub fn get_badge_meta(env: Env, token_id: u32) -> Option<BadgeRecord> {
+        storage::get_badge_meta(&env, token_id)
     }
 
     // -- Admin --
@@ -124,3 +142,13 @@ impl TradexHub {
         Ok(())
     }
 }
+
+// -- NFT trait implementations --
+
+#[contractimpl(contracttrait)]
+impl NonFungibleToken for TradexHub {
+    type ContractType = Base;
+}
+
+#[contractimpl(contracttrait)]
+impl NonFungibleBurnable for TradexHub {}

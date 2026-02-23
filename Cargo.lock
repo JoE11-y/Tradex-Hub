@@ -1729,6 +1729,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "stellar-access"
+version = "0.6.0"
+source = "git+https://github.com/JoE11-y/stellar-contracts.git?rev=b52d23be60f05a77fae79165f551cf9ddcf8154a#b52d23be60f05a77fae79165f551cf9ddcf8154a"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
+name = "stellar-contract-utils"
+version = "0.6.0"
+source = "git+https://github.com/JoE11-y/stellar-contracts.git?rev=b52d23be60f05a77fae79165f551cf9ddcf8154a#b52d23be60f05a77fae79165f551cf9ddcf8154a"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
+name = "stellar-governance"
+version = "0.6.0"
+source = "git+https://github.com/JoE11-y/stellar-contracts.git?rev=b52d23be60f05a77fae79165f551cf9ddcf8154a#b52d23be60f05a77fae79165f551cf9ddcf8154a"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "stellar-strkey"
 version = "0.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1736,6 +1760,16 @@ checksum = "ee1832fb50c651ad10f734aaf5d31ca5acdfb197a6ecda64d93fcdb8885af913"
 dependencies = [
  "crate-git-revision",
  "data-encoding",
+]
+
+[[package]]
+name = "stellar-tokens"
+version = "0.6.0"
+source = "git+https://github.com/JoE11-y/stellar-contracts.git?rev=b52d23be60f05a77fae79165f551cf9ddcf8154a#b52d23be60f05a77fae79165f551cf9ddcf8154a"
+dependencies = [
+ "soroban-sdk",
+ "stellar-contract-utils",
+ "stellar-governance",
 ]
 
 [[package]]
@@ -1863,7 +1897,9 @@ version = "0.1.0"
 dependencies = [
  "soroban-env-host 25.0.0 (git+https://github.com/stellar/rs-soroban-env?rev=cf58d535ab05d02802a5e804a95524650f8c62c7)",
  "soroban-sdk",
- "ultrahonk_rust_verifier",
+ "stellar-access",
+ "stellar-tokens",
+ "ultrahonk_soroban_verifier",
 ]
 
 [[package]]
@@ -1880,9 +1916,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "562d481066bde0658276a35467c4af00bdc6ee726305698a55b86e61d7ad82bb"
 
 [[package]]
-name = "ultrahonk_rust_verifier"
+name = "ultrahonk_soroban_verifier"
 version = "0.1.0"
-source = "git+https://github.com/yugocabrio/ultrahonk-rust-verifier.git?rev=2a73c4ba11f073f1797d90915ebbb9eb9d09f445#2a73c4ba11f073f1797d90915ebbb9eb9d09f445"
+source = "git+https://github.com/yugocabrio/ultrahonk-rust-verifier.git?rev=f13bd6b7f30558229a5eee737f30d68ab5eee085#f13bd6b7f30558229a5eee737f30d68ab5eee085"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-ff 0.5.0",

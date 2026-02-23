@@ -119,9 +119,9 @@ function saveBadge(playerId: number, badgeId: string, badgeType: number, proofHe
   ).get(playerId, badgeId, badgeType, proofHex, publicInputsHex, Date.now()) as PlayerBadgeRow;
 }
 
-function markBadgeMinted(playerId: number, badgeId: string, txHash: string): void {
+function markBadgeMinted(playerId: number, badgeId: string, txHash: string, nftTokenId?: number): void {
   const db = getDb();
-  db.query('UPDATE player_badges SET soroban_tx_hash = ? WHERE player_id = ? AND badge_id = ?').run(txHash, playerId, badgeId);
+  db.query('UPDATE player_badges SET soroban_tx_hash = ?, nft_token_id = ? WHERE player_id = ? AND badge_id = ?').run(txHash, nftTokenId ?? null, playerId, badgeId);
 }
 
 export const badgeService = {
@@ -238,8 +238,8 @@ export const badgeService = {
   },
 
   /** Mark a badge as minted on-chain after successful Soroban tx. */
-  markMinted(playerId: number, badgeId: string, txHash: string): void {
-    markBadgeMinted(playerId, badgeId, txHash);
+  markMinted(playerId: number, badgeId: string, txHash: string, nftTokenId?: number): void {
+    markBadgeMinted(playerId, badgeId, txHash, nftTokenId);
   },
 
   /** Get stored proof for a badge (needed for on-chain submission). */

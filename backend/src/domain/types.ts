@@ -157,6 +157,7 @@ export interface PlayerBadgeRow {
   proof_hex: string | null;
   public_inputs_hex: string | null;
   soroban_tx_hash: string | null;
+  nft_token_id: number | null;
   minted_at: number;
 }
 

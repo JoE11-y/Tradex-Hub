@@ -134,30 +134,39 @@ export const sorobanClient = {
     return !!(CONFIG.TRADEX_HUB_CONTRACT_ID && CONFIG.SERVER_SECRET_KEY);
   },
 
-  /** Mint a badge on-chain via mint_badge (server submits on behalf of player) */
+  /** Mint a badge NFT on-chain via mint_badge (server submits on behalf of player) */
   async mintBadge(
     playerWalletAddress: string,
-    badgeId: string,
     badgeName: string,
     badgeType: number,
     publicInputsHex: string,
     proofHex: string,
-  ): Promise<string> {
+  ): Promise<{ txHash: string; tokenId: number }> {
     const keypair = getServerKeypair();
 
     const args = [
       new Address(keypair.publicKey()).toScVal(), // admin
       new Address(playerWalletAddress).toScVal(), // player
-      nativeToScVal(badgeId, { type: "string" }), // badge_id
       nativeToScVal(badgeName, { type: "string" }), // name
       nativeToScVal(badgeType, { type: "u32" }), // badge_type
       xdr.ScVal.scvBytes(hexToBytes(publicInputsHex)), // public_inputs
       xdr.ScVal.scvBytes(hexToBytes(proofHex)), // proof_bytes
     ];
 
-    const { txHash } = await invokeContract("mint_badge", args, keypair);
-    console.log(`[sorobanClient] mint_badge tx: ${txHash}`);
-    return txHash;
+    const { txHash, returnVal } = await invokeContract("mint_badge", args, keypair);
+
+    // Contract returns Result<u32, Error> — extract token_id
+    let tokenId = 0;
+    if (returnVal) {
+      try {
+        tokenId = scValToNative(returnVal) as number;
+      } catch {
+        console.warn("[sorobanClient] Could not parse token_id from return value");
+      }
+    }
+
+    console.log(`[sorobanClient] mint_badge tx: ${txHash}, tokenId: ${tokenId}`);
+    return { txHash, tokenId };
   },
 
 };

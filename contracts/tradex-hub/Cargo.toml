@@ -8,7 +8,9 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 soroban-sdk = { workspace = true }
-ultrahonk_rust_verifier = { workspace = true }
+ultrahonk_soroban_verifier = { workspace = true }
+stellar-tokens = { workspace = true }
+stellar-access = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }

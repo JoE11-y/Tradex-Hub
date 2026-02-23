@@ -1,11 +1,4 @@
-use soroban_sdk::{symbol_short, Address, BytesN, Env, String};
-
-pub fn emit_badge(env: &Env, player: &Address, badge_id: &String, badge_type: u32) {
-    env.events().publish(
-        (symbol_short!("badge"), player.clone()),
-        (badge_id.clone(), badge_type),
-    );
-}
+use soroban_sdk::{symbol_short, BytesN, Env};
 
 pub fn emit_attestor_rotated(env: &Env, pubkey: &BytesN<32>) {
     env.events()

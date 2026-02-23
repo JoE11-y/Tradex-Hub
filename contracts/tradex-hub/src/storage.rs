@@ -1,4 +1,4 @@
-use soroban_sdk::{contracttype, Address, Bytes, BytesN, Env, String};
+use soroban_sdk::{contracttype, Address, Bytes, BytesN, Env};
 
 use crate::errors::Error;
 use crate::types::{BadgeRecord, PlayerStats};
@@ -9,8 +9,9 @@ pub enum DataKey {
     BadgeVk,
     Attestor,
     Player(Address),
-    Badge(Address, String),
-    BadgeCount(Address),
+    BadgeMeta(u32),
+    /// Maps (player, badge_type) → token_id for duplicate prevention
+    BadgeByType(Address, u32),
 }
 
 // ~30 days at 5s/block
@@ -53,13 +54,6 @@ pub fn set_badge_vk(env: &Env, vk: &Bytes) {
 
 // -- Attestor helpers --
 
-pub fn get_attestor(env: &Env) -> Result<BytesN<32>, Error> {
-    env.storage()
-        .instance()
-        .get(&DataKey::Attestor)
-        .ok_or(Error::AttestorNotSet)
-}
-
 pub fn set_attestor(env: &Env, key: &BytesN<32>) {
     env.storage().instance().set(&DataKey::Attestor, key);
 }
@@ -85,44 +79,43 @@ pub fn set_player(env: &Env, addr: &Address, stats: &PlayerStats) {
         .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);
 }
 
-// -- Badge helpers (persistent with TTL bump) --
+// -- Badge metadata helpers (persistent, keyed by NFT token_id) --
 
-pub fn get_badge(env: &Env, addr: &Address, id: &String) -> Option<BadgeRecord> {
-    let key = DataKey::Badge(addr.clone(), id.clone());
-    let badge: Option<BadgeRecord> = env.storage().persistent().get(&key);
-    if badge.is_some() {
+pub fn get_badge_meta(env: &Env, token_id: u32) -> Option<BadgeRecord> {
+    let key = DataKey::BadgeMeta(token_id);
+    let record: Option<BadgeRecord> = env.storage().persistent().get(&key);
+    if record.is_some() {
         env.storage()
             .persistent()
             .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);
     }
-    badge
+    record
 }
 
-pub fn set_badge(env: &Env, addr: &Address, id: &String, record: &BadgeRecord) {
-    let key = DataKey::Badge(addr.clone(), id.clone());
+pub fn set_badge_meta(env: &Env, token_id: u32, record: &BadgeRecord) {
+    let key = DataKey::BadgeMeta(token_id);
     env.storage().persistent().set(&key, record);
     env.storage()
         .persistent()
         .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);
 }
 
-// -- Badge count (persistent with TTL bump) --
+// -- Badge-by-type index (for duplicate prevention) --
 
-pub fn get_badge_count(env: &Env, addr: &Address) -> u32 {
-    let key = DataKey::BadgeCount(addr.clone());
-    let count: u32 = env.storage().persistent().get(&key).unwrap_or(0);
-    if count > 0 {
+pub fn get_badge_token_by_type(env: &Env, player: &Address, badge_type: u32) -> Option<u32> {
+    let key = DataKey::BadgeByType(player.clone(), badge_type);
+    let token_id: Option<u32> = env.storage().persistent().get(&key);
+    if token_id.is_some() {
         env.storage()
             .persistent()
             .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);
     }
-    count
+    token_id
 }
 
-pub fn increment_badge_count(env: &Env, addr: &Address) {
-    let key = DataKey::BadgeCount(addr.clone());
-    let count: u32 = env.storage().persistent().get(&key).unwrap_or(0);
-    env.storage().persistent().set(&key, &(count + 1));
+pub fn set_badge_token_by_type(env: &Env, player: &Address, badge_type: u32, token_id: u32) {
+    let key = DataKey::BadgeByType(player.clone(), badge_type);
+    env.storage().persistent().set(&key, &token_id);
     env.storage()
         .persistent()
         .extend_ttl(&key, TTL_LEDGERS, BUMP_AMOUNT);

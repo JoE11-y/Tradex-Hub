@@ -53,10 +53,9 @@ export const badgeHandlers = {
     const player = playerRepo.findById(playerId);
     if (!player) throw new AppError(ErrorCode.PLAYER_NOT_FOUND, 'Player not found');
 
-    // Submit to Soroban
-    const txHash = await sorobanClient.mintBadge(
+    // Submit to Soroban — mint_badge returns NFT token_id
+    const { txHash, tokenId } = await sorobanClient.mintBadge(
       player.wallet_address,
-      badge_id,
       badgeDef.name,
       badgeDef.type,
       stored.public_inputs_hex,
@@ -64,7 +63,7 @@ export const badgeHandlers = {
     );
 
     // Mark as minted locally
-    badgeService.markMinted(playerId, badge_id, txHash);
+    badgeService.markMinted(playerId, badge_id, txHash, tokenId);
 
     // Check badge_collector achievement
     achievementEngine.checkBadgeCollector(playerId);
@@ -72,6 +71,7 @@ export const badgeHandlers = {
     return c.json({
       badge_id,
       soroban_tx_hash: txHash,
+      token_id: tokenId,
       already_minted: false,
     });
   },

@@ -1,5 +1,5 @@
 use soroban_sdk::{Bytes, Env};
-use ultrahonk_rust_verifier::{UltraHonkVerifier, PROOF_BYTES};
+use ultrahonk_soroban_verifier::{UltraHonkVerifier, PROOF_BYTES};
 
 use crate::errors::Error;
 

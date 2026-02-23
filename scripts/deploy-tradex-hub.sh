@@ -22,7 +22,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-CONTRACT_DIR="$PROJECT_DIR/contracts/tradex-hub"
+CONTRACT_DIR="$PROJECT_DIR"
 BADGE_CIRCUIT_DIR="$PROJECT_DIR/circuits/badge_proof"
 BACKEND_ENV="$PROJECT_DIR/backend/.env"
 
@@ -98,7 +98,8 @@ WASM_PATH="$CONTRACT_DIR/target/wasm32v1-none/release/tradex_hub.wasm"
 if [ "${SKIP_BUILD:-}" != "1" ]; then
   echo ""
   echo "==> Building tradex-hub contract (clean)..."
-  (cd "$PROJECT_DIR" && cargo build --release --target wasm32v1-none -p tradex-hub)
+  # (cd "$PROJECT_DIR" && cargo build --release --target wasm32v1-none -p tradex-hub)
+  (cd "$PROJECT_DIR" && stellar contract build --package tradex-hub)
 else
   echo ""
   echo "==> Skipping build (SKIP_BUILD=1)"
@@ -107,20 +108,21 @@ fi
 if [ ! -f "$WASM_PATH" ]; then
   echo "ERROR: WASM not found at $WASM_PATH"
   echo "  Run without SKIP_BUILD=1, or build manually:"
-  echo "  cd $CONTRACT_DIR && cargo build --release --target wasm32v1-none"
+  # echo "  cd $CONTRACT_DIR && cargo build --release --target wasm32v1-none"
+  echo "  cd $CONTRACT_DIR && stellar contract build"
   exit 1
 fi
 
 echo "==> WASM size: $(wc -c < "$WASM_PATH") bytes"
 
-# Optimize
-echo "==> Optimizing WASM..."
-stellar contract optimize --wasm "$WASM_PATH" 2>/dev/null || true
-OPTIMIZED_PATH="${WASM_PATH%.wasm}.optimized.wasm"
-if [ -f "$OPTIMIZED_PATH" ]; then
-  WASM_PATH="$OPTIMIZED_PATH"
-  echo "  Optimized WASM: $(wc -c < "$WASM_PATH") bytes"
-fi
+# # Optimize
+# echo "==> Optimizing WASM..."
+# stellar contract optimize --wasm "$WASM_PATH" 2>/dev/null || true
+# OPTIMIZED_PATH="${WASM_PATH%.wasm}.optimized.wasm"
+# if [ -f "$OPTIMIZED_PATH" ]; then
+#   WASM_PATH="$OPTIMIZED_PATH"
+#   echo "  Optimized WASM: $(wc -c < "$WASM_PATH") bytes"
+# fi
 
 # ── Step 2: Read badge VK bytes ──
 
@@ -177,6 +179,22 @@ echo "==> Attestor public key: $ATTESTOR_PUBKEY_HEX"
 
 echo ""
 echo "==> Installing WASM on $NETWORK..."
+
+
+echo "==> Deploying tradex-hub with constructor args..."
+echo ""
+echo "────────────────────────────────────────"
+echo "  Run this command manually if it hangs:"
+echo "────────────────────────────────────────"
+echo "stellar contract upload \\"
+echo "   --wasm $WASM_PATH \\"
+echo "  --source-account $SOURCE_ACCOUNT \\"
+echo "  --network $NETWORK \\"
+echo "  --inclusion-fee 10000000"
+echo "────────────────────────────────────────"
+echo ""
+
+
 INSTALL_OUTPUT=$(stellar contract upload \
   --wasm "$WASM_PATH" \
   --source-account "$SOURCE_ACCOUNT" \
