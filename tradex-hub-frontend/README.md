@@ -1,4 +1,4 @@
-# Tradex
+# Tradex Hub
 
 **Learn to trade. Prove it on-chain.**
 
@@ -43,6 +43,7 @@ Backend-first design. The server (Bun + Hono + SQLite) is the single source of t
 | Backend        | Bun + Hono + bun:sqlite                                       |
 | Frontend       | React 19 + Vite 7 + TailwindCSS 4 + Zustand 5                 |
 | Charts         | Lightweight Charts 5.1 (TradingView)                          |
+| Routing        | React Router v7 (URL-based page navigation)                   |
 | Smart Contract | Soroban (Rust, `wasm32v1-none`)                               |
 | ZK Circuits    | Noir 1.0.0-beta.9 + UltraHonk (Barretenberg 0.87.0)           |
 | Wallet         | StellarWalletsKit (Freighter, xBull, Lobstr, etc.) + dev mode |
@@ -66,7 +67,7 @@ Full futures and options simulator against live market prices. Long/short positi
 
 - **30 levels** across 4 tiers (Novice/Trader/Pro/Master)
 - **15+ achievements** spanning trading, education, and risk management
-- **25 mintable badges** -- on-chain ZK-verified credentials (see [badge_proof circuit](circuits/badge_proof/))
+- **25 mintable badges** -- on-chain ZK-verified credentials
 - **Global leaderboard** rebuilt every 30 seconds
 - **Risk management**: 5% drawdown lockout, XP penalties for blown accounts
 
@@ -74,110 +75,82 @@ Full futures and options simulator against live market prices. Long/short positi
 
 Badges are verifiable on-chain credentials backed by zero-knowledge proofs. Players prove they meet a badge threshold (e.g. "500+ XP", "10 winning streak") without revealing their full stat profile.
 
-**Trust chain**: Server attests stats (Ed25519) -> [Noir circuit](circuits/badge_proof/) proves eligibility -> [Soroban contract](contracts/tradex-hub/) verifies both -> Badge permanently recorded on-chain.
+**Trust chain**: Server attests stats (Ed25519) -> Noir circuit proves eligibility -> Soroban contract verifies both -> Badge permanently recorded on-chain.
 
-See the component READMEs for details:
+## URL Routes
 
-- **[contracts/tradex-hub/](contracts/tradex-hub/)** -- Soroban smart contract with UltraHonk verification
-- **[circuits/badge_proof/](circuits/badge_proof/)** -- Noir ZK circuit for badge eligibility proofs
+| Route                       | Page                  |
+| --------------------------- | --------------------- |
+| `/`                         | Lobby (module select) |
+| `/games/trading/:playerId`  | Paper Trading         |
+| `/games/patterns/:playerId` | Pattern Recognition   |
+| `/games/forecast/:playerId` | Price Predictions     |
+| `/games/profile/:playerId`  | Player Profile        |
+| `/games/summary/:playerId`  | Session Summary       |
+| `/leaderboard`              | Global Leaderboard    |
 
 ## Project Structure
 
 ```text
-Tradex-App/
-├── backend/                        # Bun + Hono backend (source of truth)
+tradex-hub-frontend/               # Standalone frontend (this package)
+├── src/
+│   ├── App.tsx                    # Root: wraps TradexGame in react-router
+│   ├── main.tsx                   # Entry: BrowserRouter + StrictMode
+│   ├── index.css                  # Tailwind imports + animations
+│   └── games/tradex/
+│       ├── TradexGame.tsx         # Root component: WS lifecycle, route definitions
+│       ├── routeNav.ts            # Global navigate bridge (Zustand <-> react-router)
+│       ├── types.ts               # Levels, achievements, badge definitions
+│       ├── pages/
+│       │   ├── LoginPage.tsx      # Wallet connection (StellarWalletsKit) + dev mode
+│       │   ├── LobbyPage.tsx      # Module selector + quick nav
+│       │   ├── TradingPage.tsx    # Main trading interface
+│       │   ├── SummaryPage.tsx    # Session results
+│       │   ├── ProfilePage.tsx    # Player stats, badges, achievements
+│       │   ├── LeaderboardPage.tsx # Global rankings
+│       │   ├── PatternPage.tsx    # Pattern recognition challenges
+│       │   └── PredictionPage.tsx # Price prediction challenges
+│       ├── components/
+│       │   ├── TradingChart.tsx   # TradingView Lightweight Charts (candlestick + volume)
+│       │   ├── CandleChart.tsx    # Standalone candle chart (pattern/prediction modules)
+│       │   ├── OrderPanel.tsx     # Futures order entry (side, leverage, margin)
+│       │   ├── OptionsPanel.tsx   # Options order entry (call/put, strike, expiry)
+│       │   ├── PositionsList.tsx  # Open positions with live PnL
+│       │   ├── ActiveOptions.tsx  # Open option contracts with countdown
+│       │   ├── PortfolioWidget.tsx # Balance, margin, unrealized PnL
+│       │   ├── TradeHistory.tsx   # Closed trade records
+│       │   ├── LeaderboardTable.tsx # Ranked player table
+│       │   ├── BadgeCollection.tsx # Badge display + mint flow
+│       │   ├── AchievementGrid.tsx # Achievement display
+│       │   ├── PlayerCard.tsx     # Player level, XP bar
+│       │   ├── NavBar.tsx         # Top navigation with player ID + XP bar
+│       │   ├── TickerBar.tsx      # Live price ticker
+│       │   ├── AssetHeader.tsx    # Asset info display
+│       │   ├── StreakIndicator.tsx # Streak multiplier display
+│       │   ├── SessionHistoryList.tsx # Past sessions
+│       │   ├── BottomTabs.tsx     # Tab navigation (positions/history/achievements)
+│       │   └── NotificationToast.tsx # XP, achievement, liquidation notifications
+│       ├── store/
+│       │   ├── tradingStore.ts    # Trading state (async REST actions)
+│       │   ├── gameStore.ts       # Gamification state (XP, levels, navigation)
+│       │   ├── connectionStore.ts # Auth, session restore, WebSocket connection
+│       │   └── educationStore.ts  # Pattern + prediction module state
+│       └── services/
+│           ├── api.ts             # REST client (typed endpoints, token persistence)
+│           └── wsClient.ts        # WebSocket manager
+│
+backend/                           # Bun + Hono backend (source of truth)
 │   └── src/
-│       ├── index.ts               # Server entry (Bun.serve + Hono + WebSocket)
+│       ├── index.ts               # Server entry + dev player seeding
 │       ├── config.ts              # Constants, env vars
-│       ├── db/
-│       │   ├── connection.ts      # bun:sqlite singleton
-│       │   ├── schema.ts          # CREATE TABLE migrations (10+ tables)
-│       │   └── repositories/      # CRUD per table (player, session, position, trade, option)
-│       ├── domain/
-│       │   ├── types.ts           # Shared types, level tables, badge/achievement definitions
-│       │   └── errors.ts          # Error codes
-│       ├── services/
-│       │   ├── priceService.ts    # Binance proxy + 2s polling + cache
-│       │   ├── tradingEngine.ts   # Futures: open/close/liquidate positions
-│       │   ├── optionsEngine.ts   # Options: open/settle/expire (call/put)
-│       │   ├── sessionManager.ts  # Session lifecycle management
-│       │   ├── playerService.ts   # Auth (challenge/verify), profile, XP/levels
-│       │   ├── achievementEngine.ts # Achievement detection (15 conditions)
-│       │   ├── leaderboardService.ts # Materialized rankings (30s rebuild)
-│       │   ├── badgeService.ts    # Badge eligibility check + ZK proof generation
-│       │   ├── noirProver.ts      # nargo/bb CLI wrapper for proof generation
-│       │   ├── sorobanClient.ts   # Stellar SDK client for contract interaction
-│       │   ├── patternService.ts  # Pattern recognition challenges
-│       │   └── predictionService.ts # Price prediction challenges
-│       ├── api/
-│       │   ├── routes.ts          # All REST route definitions
-│       │   ├── validate.ts        # Zod schemas for request validation
-│       │   ├── middleware/auth.ts # Bearer token auth middleware
-│       │   └── handlers/          # Route handlers (9 modules)
-│       └── ws/
-│           ├── handler.ts         # WebSocket connection management
-│           ├── broadcaster.ts     # Broadcast to subscribed clients
-│           └── messages.ts        # Typed message definitions (12+ event types)
+│       ├── db/                    # SQLite schema, connection, repositories
+│       ├── services/              # Trading, options, badges, patterns, predictions
+│       ├── api/                   # REST routes + handlers
+│       └── ws/                    # WebSocket handler + broadcaster
 │
-├── sgs_frontend/src/games/tradex/ # React thin client
-│   ├── TradexGame.tsx             # Root component: WS lifecycle, page routing
-│   ├── pages/
-│   │   ├── LoginPage.tsx          # Wallet connection (StellarWalletsKit) + dev mode
-│   │   ├── LobbyPage.tsx         # Session start, asset selection
-│   │   ├── TradingPage.tsx       # Main trading interface
-│   │   ├── SummaryPage.tsx       # Session results
-│   │   ├── ProfilePage.tsx       # Player stats, badges, achievements
-│   │   ├── LeaderboardPage.tsx   # Global rankings
-│   │   ├── PatternPage.tsx       # Pattern recognition challenges
-│   │   └── PredictionPage.tsx    # Price prediction challenges
-│   ├── components/
-│   │   ├── TradingChart.tsx      # TradingView Lightweight Charts (candlestick + volume)
-│   │   ├── CandleChart.tsx       # Standalone candle chart (pattern/prediction modules)
-│   │   ├── OrderPanel.tsx        # Futures order entry (side, leverage, margin)
-│   │   ├── OptionsPanel.tsx      # Options order entry (call/put, strike, expiry)
-│   │   ├── PositionsList.tsx     # Open positions with live PnL
-│   │   ├── ActiveOptions.tsx     # Open option contracts with countdown
-│   │   ├── PortfolioWidget.tsx   # Balance, margin, unrealized PnL
-│   │   ├── TradeHistory.tsx      # Closed trade records
-│   │   ├── LeaderboardTable.tsx  # Ranked player table
-│   │   ├── BadgeCollection.tsx   # Badge display + mint flow
-│   │   ├── AchievementGrid.tsx   # Achievement display
-│   │   ├── PlayerCard.tsx        # Player level, XP bar
-│   │   ├── NavBar.tsx            # Top navigation
-│   │   ├── TickerBar.tsx         # Live price ticker
-│   │   ├── AssetHeader.tsx       # Asset info display
-│   │   ├── StreakIndicator.tsx   # Streak multiplier display
-│   │   ├── SessionHistoryList.tsx # Past sessions
-│   │   ├── BottomTabs.tsx       # Mobile navigation tabs
-│   │   └── NotificationToast.tsx # XP, achievement, liquidation notifications
-│   ├── store/
-│   │   ├── tradingStore.ts      # Trading state (async REST actions)
-│   │   ├── gameStore.ts         # Gamification state (server-synced)
-│   │   └── connectionStore.ts   # Auth + WebSocket connection
-│   └── services/
-│       ├── api.ts               # REST client (typed endpoints)
-│       └── wsClient.ts          # WebSocket manager
-│
-├── contracts/tradex-hub/         # Soroban smart contract (standalone)
-│   ├── Cargo.toml               # Pinned soroban-sdk rev for UltraHonk compat
-│   └── src/
-│       ├── lib.rs               # Contract entry + #[contractimpl]
-│       ├── types.rs             # PlayerStats, BadgeRecord
-│       ├── storage.rs           # DataKey enum, TTL helpers, CRUD
-│       ├── errors.rs            # 9 error variants
-│       ├── events.rs            # Event emission helpers
-│       └── verification.rs      # UltraHonk proof verification + byte parsing
-│
-├── circuits/badge_proof/         # Noir ZK circuit
-│   ├── Nargo.toml
-│   ├── Prover.toml              # Test witness
-│   └── src/main.nr              # Badge eligibility verifier (25 types, 12 stats)
-│
-└── scripts/
-    ├── build-badge-circuit.sh   # Compile circuit + generate VK + optional test proof
-    ├── build.ts                 # Build all Soroban contracts
-    ├── deploy.ts                # Deploy contracts to testnet (handles tradex-hub custom args)
-    └── setup.ts                 # One-command: build + deploy + bindings + config
+contracts/tradex-hub/              # Soroban smart contract (UltraHonk verification)
+circuits/badge_proof/              # Noir ZK circuit (badge eligibility proofs)
+scripts/                           # Build, deploy, setup automation
 ```
 
 ## Quick Start
@@ -190,36 +163,35 @@ Tradex-App/
 - [Barretenberg](https://github.com/AztecProtocol/barretenberg) v0.87.0 (`bb`)
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli) (`stellar`)
 
+### Setup
+
+```bash
+# From the Tradex-App root
+bun install
+cd backend && bun install && cd ..
+cd tradex-hub-frontend && bun install && cd ..
+
+# Deploy contracts + generate config (one-time)
+bun run setup
+```
+
 ### Development
 
 ```bash
-# Install dependencies
-cd Tradex-App
-bun install
-cd backend && bun install
-
-# Start backend (port 3001)
+# Start backend (port 3001) -- source of truth for all game state
 bun run dev:backend
 
-# Start frontend (port 3000)
+# Start frontend (port 5173)
 bun run dev:game tradex-hub
 ```
+
+On first backend start with a fresh DB, dev players 1 and 2 are auto-seeded from the `.env` wallet addresses.
 
 ### Build ZK Circuit
 
 ```bash
 bun run build:circuits          # compile + generate VK
 bun run build:circuits:prove    # also generate + verify test proof
-```
-
-### Deploy Contracts
-
-```bash
-# Deploy everything (including tradex-hub with attestor + game_hub + badge VK)
-bun run setup
-
-# Or deploy just tradex-hub
-bun run deploy tradex-hub
 ```
 
 ### All Commands
@@ -229,14 +201,12 @@ bun run setup                # Build + deploy contracts, generate bindings, writ
 bun run build [name]         # Build all or selected Soroban contracts
 bun run deploy [name]        # Deploy all or selected contracts to testnet
 bun run bindings [name]      # Generate TypeScript bindings
-bun run create <name>        # Scaffold a new game (contract + frontend)
 bun run dev                  # Run sgs_frontend dev server
 bun run dev:game <name>      # Run a standalone game frontend (e.g. tradex-hub)
 bun run dev:backend          # Run backend dev server (port 3001, watch mode)
 bun run start:backend        # Run backend in production mode
 bun run build:circuits       # Compile Noir circuit + generate verification key
 bun run build:circuits:prove # Compile + generate + verify a test proof
-bun run publish <name>       # Export + build production frontend
 ```
 
 ## API Surface
@@ -256,11 +226,15 @@ bun run publish <name>       # Export + build production frontend
 | Predictions | `POST /api/predictions/challenge`, `/answer`, `GET /api/predictions/stats` |
 | Prices      | `GET /api/prices/current`, `/candles`                                      |
 
-### WebSocket Protocol
+### WebSocket Events
 
 **Server -> Client**: `price_update`, `candle_update`, `portfolio_update`, `position_liquidated`, `option_settled`, `xp_awarded`, `level_up`, `achievement_unlocked`, `leaderboard_update`, `drawdown_lockout`, `account_blown`, `position_closed_sltp`, `xp_penalty`, `level_down`
 
 **Client -> Server**: `subscribe_prices`, `unsubscribe_prices`, `subscribe_candles`, `ping`
+
+## Session Persistence
+
+Auth tokens are stored in `sessionStorage` and automatically restored on page refresh. The backend (SQLite) is the source of truth for all player data -- XP, levels, achievements, badges, trade history. On refresh, the frontend validates the stored token, fetches the full player profile from the DB, and reconnects the WebSocket.
 
 ## License
 

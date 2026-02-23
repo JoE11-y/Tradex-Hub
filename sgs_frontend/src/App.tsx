@@ -4,7 +4,6 @@ import { Layout } from './components/Layout';
 import { GamesCatalog } from './components/GamesCatalog';
 import { DocsPage } from './pages/DocsPage';
 import { HomePage } from './pages/HomePage';
-import { TradexGame } from './games/tradex/TradexGame';
 import type { Page } from './types/navigation';
 
 const baseUrl = import.meta.env.BASE_URL || '/';
@@ -20,7 +19,7 @@ const parseHashRoute = (): { page: Page; search: string } | null => {
   const [pathPart, queryPart = ''] = raw.split('?');
   const segment = pathPart.replace(/^\/+/, '').split('/')[0];
 
-  if (segment !== 'docs' && segment !== 'games' && segment !== 'tradex') return null;
+  if (segment !== 'docs' && segment !== 'games') return null;
 
   return {
     page: segment as Page,
@@ -42,7 +41,6 @@ const resolvePageFromLocation = (): Page => {
 
   if (segment === 'docs') return 'docs';
   if (segment === 'games') return 'games';
-  if (segment === 'tradex') return 'tradex';
   return 'home';
 };
 
@@ -86,7 +84,7 @@ function App() {
 
   return (
     <Layout currentPage={page} onNavigate={navigate}>
-      {!hasAnyContracts && page !== 'tradex' && (
+      {!hasAnyContracts && (
         <div className="card" style={{ marginBottom: '2rem' }}>
           <h3>Setup Required</h3>
           <p style={{ color: 'var(--color-ink-muted)', marginTop: '1rem' }}>
@@ -96,9 +94,8 @@ function App() {
         </div>
       )}
 
-      {page === 'tradex' && <TradexGame onBack={() => navigate('games')} />}
       {page === 'docs' && <DocsPage />}
-      {page === 'games' && <GamesCatalog onBack={() => navigate('home')} onNavigate={navigate} />}
+      {page === 'games' && <GamesCatalog onBack={() => navigate('home')} />}
       {page === 'home' && <HomePage onNavigate={navigate} />}
     </Layout>
   );

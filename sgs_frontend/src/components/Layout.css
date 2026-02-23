@@ -30,7 +30,7 @@
 .orb-1 {
   top: -15%;
   left: -10%;
-  background: radial-gradient(circle at 35% 35%, rgba(99, 102, 241, 0.55), transparent 65%);
+  background: radial-gradient(circle at 35% 35%, rgba(253, 218, 36, 0.7), transparent 65%);
   animation-delay: 0s;
 }
 
@@ -44,7 +44,7 @@
 .orb-3 {
   bottom: -25%;
   left: 25%;
-  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.35), transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(247, 205, 110, 0.4), transparent 70%);
   animation-delay: -14s;
 }
 
@@ -53,8 +53,8 @@
   inset: 0;
   background-image: linear-gradient(
     120deg,
-    rgba(99, 102, 241, 0.8),
-    rgba(56, 189, 248, 0.85),
+    rgba(253, 218, 36, 0.9),
+    rgba(67, 161, 210, 0.88),
     rgba(31, 95, 139, 0.92)
   );
   mask-image: radial-gradient(circle, #000 1.6px, transparent 2.2px);

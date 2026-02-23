@@ -3,38 +3,29 @@ import { TwentyOneGame } from '../games/twenty-one/TwentyOneGame';
 import { NumberGuessGame } from '../games/number-guess/NumberGuessGame';
 import { DiceDuelGame } from '../games/dice-duel/DiceDuelGame';
 import { useWallet } from '@/hooks/useWallet';
-import type { Page } from '../types/navigation';
 import typezeroHero from '../assets/typezero-hero.png';
 import xrayHero from '../assets/xray-hero.png';
 import './GamesCatalog.css';
 
 const games = [
   {
-    id: 'tradex',
-    title: 'Tradex',
-    emoji: '\u{1F4C8}',
-    description: 'Learn crypto futures trading with real prices and ZK-verified sessions.',
-    tags: ['1 player', 'Trading', 'ZK Proofs'],
-    featured: true,
-  },
-  {
     id: 'twenty-one',
     title: 'Twenty-One',
-    emoji: '\u{1F0CF}',
+    emoji: '🃏',
     description: 'Card strategy duel where close-to-21 wins without busting.',
     tags: ['2 players', 'Card strategy'],
   },
   {
     id: 'number-guess',
     title: 'Number Guess',
-    emoji: '\u{1F3AF}',
+    emoji: '🎯',
     description: 'Pick a number, lock it in, and reveal the closest guess.',
     tags: ['2 players', 'Fast rounds'],
   },
   {
     id: 'dice-duel',
     title: 'Dice Duel',
-    emoji: '\u{1F3B2}',
+    emoji: '🎲',
     description: 'Roll two dice each and race for the highest total.',
     tags: ['2 players', 'Quick launch'],
   },
@@ -42,20 +33,15 @@ const games = [
 
 interface GamesCatalogProps {
   onBack?: () => void;
-  onNavigate?: (page: Page) => void;
 }
 
-export function GamesCatalog({ onBack, onNavigate }: GamesCatalogProps) {
+export function GamesCatalog({ onBack }: GamesCatalogProps) {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const { publicKey, isConnected, isConnecting, error } = useWallet();
 
   const userAddress = publicKey ?? '';
 
   const handleSelectGame = (gameId: string) => {
-    if (gameId === 'tradex' && onNavigate) {
-      onNavigate('tradex');
-      return;
-    }
     setSelectedGame(gameId);
   };
 
@@ -138,7 +124,7 @@ export function GamesCatalog({ onBack, onNavigate }: GamesCatalogProps) {
             key={game.id}
             className="game-card"
             type="button"
-            disabled={!isConnected && game.id !== 'tradex'}
+            disabled={!isConnected}
             onClick={() => handleSelectGame(game.id)}
             style={{ animationDelay: `${index * 120}ms` }}
           >

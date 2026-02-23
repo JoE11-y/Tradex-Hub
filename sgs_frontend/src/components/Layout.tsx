@@ -10,13 +10,6 @@ interface LayoutProps {
 }
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
-  const isTradex = currentPage === 'tradex';
-
-  // Tradex gets a minimal wrapper — it has its own full-screen layout
-  if (isTradex) {
-    return <>{children}</>;
-  }
-
   return (
     <div className="studio">
       <div className="studio-background" aria-hidden="true">
